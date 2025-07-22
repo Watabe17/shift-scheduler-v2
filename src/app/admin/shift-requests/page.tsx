@@ -36,8 +36,8 @@ export default function AdminShiftRequestPage() {
       }
       const data: ShiftRequestAdminView[] = await res.json();
       setRequests(data);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
       setIsLoading(false);
     }
@@ -64,8 +64,8 @@ export default function AdminShiftRequestPage() {
           req.id === id ? { ...req, status: status } : req
         )
       );
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : String(err));
     }
   };
 

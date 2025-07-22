@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useSession } from "next-auth/react";
 import { toast } from "react-toastify";
-import { Position, ShiftRequest, RequiredStaff, User } from "@prisma/client";
+import { Position, ShiftRequest, RequiredStaff, User } from "../../types/models";
 import EmployeeShiftRequestModal from "@/components/EmployeeShiftRequestModal";
 import { format, startOfWeek, getDay, isSameDay, startOfMonth, endOfMonth, eachDayOfInterval, addMonths, subMonths, isSameMonth, endOfWeek } from "date-fns";
 import { ja } from 'date-fns/locale';
@@ -48,7 +48,7 @@ const ShiftRequestPage = () => {
       setRequiredStaff(requiredStaffData);
       setShiftRequests(shiftRequestsData);
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching data:", error);
       toast.error("データの取得に失敗しました。");
     }
@@ -106,8 +106,8 @@ const ShiftRequestPage = () => {
         const errorData = await response.json();
         toast.error(`提出に失敗しました: ${errorData.error}`);
       }
-    } catch (error: any) {
-      toast.error(`エラーが発生しました: ${error.message}`);
+    } catch (error: unknown) {
+      toast.error(`エラーが発生しました: ${error instanceof Error ? error.message : String(error)}`);
     }
   };
 
@@ -126,8 +126,8 @@ const ShiftRequestPage = () => {
             const errorData = await response.json();
             toast.error(`更新に失敗しました: ${errorData.error}`);
         }
-    } catch (error: any) {
-        toast.error(`エラーが発生しました: ${error.message}`);
+    } catch (error: unknown) {
+        toast.error(`エラーが発生しました: ${error instanceof Error ? error.message : String(error)}`);
     }
   };
 
@@ -142,8 +142,8 @@ const ShiftRequestPage = () => {
             const errorData = await response.json();
             toast.error(`削除に失敗しました: ${errorData.error || '不明なエラー'}`);
         }
-    } catch (error: any) {
-        toast.error(`エラーが発生しました: ${error.message}`);
+    } catch (error: unknown) {
+        toast.error(`エラーが発生しました: ${error instanceof Error ? error.message : String(error)}`);
     }
   };
 

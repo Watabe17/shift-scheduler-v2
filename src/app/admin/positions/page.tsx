@@ -1,13 +1,9 @@
 "use client";
 
 import { useState, useEffect, FormEvent } from "react";
-import { Position, RequiredStaff } from "@prisma/client";
+import { Position, RequiredStaff, PositionWithStaff } from "../types/models";
 import RequiredStaffManager from "@/components/RequiredStaffManager";
 import { toast } from "react-toastify";
-
-interface PositionWithStaff extends Position {
-  requiredStaffs: RequiredStaff[];
-}
 
 // 新しく追加：ポジションごとのアイテムコンポーネント
 const PositionItem = ({ position, onUpdate, onDelete }: { position: PositionWithStaff, onUpdate: (id: string, name: string) => Promise<void>, onDelete: (id: string) => Promise<void> }) => {
@@ -49,7 +45,7 @@ const PositionItem = ({ position, onUpdate, onDelete }: { position: PositionWith
           </button>
         </div>
       </div>
-      <RequiredStaffManager position={position} onUpdate={onUpdate as any} />
+      <RequiredStaffManager position={position} onUpdate={onUpdate} />
     </div>
   )
 }
@@ -66,8 +62,8 @@ export default function PositionsPage() {
       if (!res.ok) throw new Error("ポジションの取得に失敗しました");
       const data: PositionWithStaff[] = await res.json();
       setPositions(data);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
       setIsLoading(false);
     }
@@ -93,8 +89,8 @@ export default function PositionsPage() {
       toast.success(`「${newPositionName}」を作成しました。`);
       setNewPositionName("");
       await fetchPositions();
-    } catch (err: any) {
-      toast.error(`エラー: ${err.message}`);
+    } catch (err: unknown) {
+      toast.error(`エラー: ${err instanceof Error ? err.message : String(err)}`);
     }
   };
 
@@ -108,8 +104,8 @@ export default function PositionsPage() {
       if(!res.ok) throw new Error("ポジション名の更新に失敗しました。");
       toast.success("ポジション名を更新しました。");
       await fetchPositions();
-    } catch (err: any) {
-      toast.error(`エラー: ${err.message}`);
+    } catch (err: unknown) {
+      toast.error(`エラー: ${err instanceof Error ? err.message : String(err)}`);
     }
   };
 
@@ -122,8 +118,8 @@ export default function PositionsPage() {
       if(!res.ok) throw new Error("ポジションの削除に失敗しました。");
       toast.success("ポジションを削除しました。");
       await fetchPositions();
-    } catch (err: any) {
-      toast.error(`エラー: ${err.message}`);
+    } catch (err: unknown) {
+      toast.error(`エラー: ${err instanceof Error ? err.message : String(err)}`);
     }
   }
   

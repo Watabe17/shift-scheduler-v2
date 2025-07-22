@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
-import { Position, Shift, ShiftStatus, User } from "@prisma/client";
+import { Position, Shift, ShiftStatus, User } from "../../types/models";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ShiftEditModal from "@/components/ShiftEditModal";
@@ -76,8 +76,8 @@ export default function ShiftsManagementPage() {
       setConfirmedShifts(confirmedData);
       setPositions(positionsData);
       setEmployees(employeesData);
-    } catch (err: any) {
-      toast.error(err.message);
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : String(err));
     } finally {
       setIsLoading(false);
     }
@@ -96,8 +96,8 @@ export default function ShiftsManagementPage() {
       toast.success(`${result.count}件のシフトを確定しました。`);
       await fetchShifts();
       setActiveTab('confirmed');
-    } catch (err: any) {
-      toast.error(`エラー: ${err.message}`);
+    } catch (err: unknown) {
+      toast.error(`エラー: ${err instanceof Error ? err.message : String(err)}`);
     }
   };
 
@@ -122,8 +122,8 @@ export default function ShiftsManagementPage() {
       toast.success("シフトが正常に更新されました！");
       handleCloseModal();
       await fetchShifts();
-    } catch (err: any) {
-      toast.error(`エラー: ${err.message}`);
+    } catch (err: unknown) {
+      toast.error(`エラー: ${err instanceof Error ? err.message : String(err)}`);
     }
   };
 
@@ -134,8 +134,8 @@ export default function ShiftsManagementPage() {
       if (!res.ok) throw new Error("シフトの削除に失敗しました。");
       toast.success("シフトが正常に削除されました。");
       await fetchShifts();
-    } catch (err: any) {
-      toast.error(`エラー: ${err.message}`);
+    } catch (err: unknown) {
+      toast.error(`エラー: ${err instanceof Error ? err.message : String(err)}`);
     }
   };
 

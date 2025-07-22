@@ -5,7 +5,7 @@ import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, addMonths, subMonths, isSameDay, getDay } from "date-fns";
 import { ja } from "date-fns/locale";
-import { Prisma, Position, User, Shift, ShiftRequest as PrismaShiftRequest } from '@prisma/client';
+import { Position, User, Shift, ShiftRequest, RequiredStaff, PositionWithStaff } from "../../types/models";
 import { toast } from 'react-toastify';
 import ShiftEditModal from "@/components/ShiftEditModal";
 import jsPDF from 'jspdf';
@@ -14,9 +14,8 @@ import { ToastContainer } from 'react-toastify';
 import DailyShiftCalendar from '@/components/DailyShiftCalendar';
 
 // --- 型定義 ---
-type ShiftRequest = PrismaShiftRequest & { user: User, position: Position, shift?: Shift | null };
 type FullShift = Shift & { user: User, position: Position, shiftRequestId: string | null };
-type RequiredStaffRule = Prisma.RequiredStaffGetPayload<{ include: { position: true } }>;
+type RequiredStaffRule = RequiredStaff & { position: Position };
 
 type ShiftType = {
   name: string;
@@ -36,13 +35,13 @@ const ItemTypes = { SHIFT_REQUEST: "shift_request" };
 
 // --- ドラッグ可能な申請カードコンポーネント ---
 const DraggableShiftRequest = ({ request }: { request: ShiftRequest }) => {
-  const [{ isDragging }, drag] = useDrag(() => ({
+  const [{ isDragging }, drag] = useDrag<{ /* item型 */ }, void, { isDragging: boolean }>({
     type: ItemTypes.SHIFT_REQUEST,
     item: { ...request },
-    collect: (monitor) => ({
+    collect: (monitor: { isDragging: () => boolean }) => ({
       isDragging: monitor.isDragging(),
     }),
-  }));
+  });
 
   return (
     <div
@@ -60,10 +59,10 @@ const DraggableShiftRequest = ({ request }: { request: ShiftRequest }) => {
 
 // --- レーンコンポーネント ---
 const PositionLane = ({ position, shifts, onDrop, onShiftClick }: { position: Position, shifts: FullShift[], onDrop: (item: ShiftRequest, positionId: string) => void, onShiftClick: (shift: FullShift) => void }) => {
-    const [{ isOver, canDrop }, drop] = useDrop({
+    const [{ isOver, canDrop }, drop] = useDrop<ShiftRequest, void, { isOver: boolean; canDrop: boolean }>({
         accept: ItemTypes.SHIFT_REQUEST,
         drop: (item: ShiftRequest) => onDrop(item, position.id),
-        collect: (monitor) => ({
+        collect: (monitor: { isOver: () => boolean; canDrop: () => boolean }) => ({
             isOver: monitor.isOver(),
             canDrop: monitor.canDrop(),
         }),
@@ -119,10 +118,10 @@ const SimpleCalendar = ({ currentMonth, onMonthChange, shifts, requiredStaff, po
     const isCurrentMonth = isSameMonth(day, currentMonth);
 
     // DayCellのdropはもう使わないが、コンテナとしてのdivは残す
-    const [{ isOver }, drop] = useDrop(() => ({
+    const [{ isOver }, drop] = useDrop<ShiftRequest, void, { isOver: boolean }>({
         accept: ItemTypes.SHIFT_REQUEST,
-        collect: monitor => ({ isOver: monitor.isOver() }),
-    }));
+        collect: (monitor: { isOver: () => boolean }) => ({ isOver: monitor.isOver() }),
+    });
 
 
     return (
@@ -259,7 +258,7 @@ export default function ShiftCreationPage() {
       setPositions(positionsData);
       setEmployees(employeesData);
 
-    } catch (error) { 
+    } catch (error: unknown) {
       console.error(error);
       toast.error("データの取得に失敗しました。");
     }
@@ -295,9 +294,9 @@ export default function ShiftCreationPage() {
       const month = currentMonth.getMonth() + 1;
       await fetchAllData(year, month);
       toast.success("シフトを作成しました");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to create shift:", error);
-      toast.error(`シフト作成失敗: ${error.message}`);
+      toast.error(`シフト作成失敗: ${error instanceof Error ? error.message : String(error)}`);
     }
   }, [fetchAllData, currentMonth]);
 
@@ -351,8 +350,8 @@ export default function ShiftCreationPage() {
       const year = currentMonth.getFullYear();
       const month = currentMonth.getMonth() + 1;
       await fetchAllData(year, month);
-    } catch (err: any) {
-      toast.error(`Error: ${err.message}`);
+    } catch (err: unknown) {
+      toast.error(`Error: ${err instanceof Error ? err.message : String(err)}`);
     }
   };
 
@@ -377,8 +376,8 @@ export default function ShiftCreationPage() {
       await fetchAllData(year, month);
       toast.success("Shift deleted successfully!");
       handleCloseModal();
-    } catch (err: any) {
-        toast.error(`Error: ${err.message}`);
+    } catch (err: unknown) {
+        toast.error(`Error: ${err instanceof Error ? err.message : String(err)}`);
     }
   }, [selectedShift, fetchAllData, handleCloseModal, currentMonth]);
 
@@ -432,8 +431,8 @@ export default function ShiftCreationPage() {
         const result = await res.json();
         toast.success(result.message || 'シフトを確定しました！');
         await fetchAllData(year, month);
-      } catch (err: any) {
-        toast.error(`エラー: ${err.message}`);
+      } catch (err: unknown) {
+        toast.error(`エラー: ${err instanceof Error ? err.message : String(err)}`);
       } finally {
         setIsFinalizing(false);
       }
@@ -454,8 +453,8 @@ export default function ShiftCreationPage() {
         const month = currentMonth.getMonth() + 1;
         await fetchAllData(year, month);
         toast.success("All draft shifts cleared successfully!");
-      } catch (err: any) {
-        toast.error(`Error: ${err.message}`);
+      } catch (err: unknown) {
+        toast.error(`Error: ${err instanceof Error ? err.message : String(err)}`);
       }
     }
   }, [fetchAllData, currentMonth]);

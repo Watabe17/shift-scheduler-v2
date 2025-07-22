@@ -6,6 +6,7 @@ import { format } from 'date-fns';
 import { ja } from 'date-fns/locale';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { User as AppUser } from "../../types/models";
 
 // For simplicity, modals are in the same file. In a real app, extract them.
 
@@ -176,7 +177,7 @@ export default function EmployeesPage() {
             const posData = await posRes.json();
             setEmployees(empData);
             setAllPositions(posData);
-        } catch (error: any) {
+        } catch (error: Error) {
             toast.error(`エラー: ${error.message}`);
         } finally {
             setIsLoading(false);
@@ -201,7 +202,7 @@ export default function EmployeesPage() {
             toast.success("従業員が正常に追加されました！");
             await fetchData();
             setIsAddModalOpen(false);
-        } catch (error: any) {
+        } catch (error: Error) {
             toast.error(`エラー: ${error.message}`);
             throw error;
         }
@@ -218,7 +219,7 @@ export default function EmployeesPage() {
             toast.success("役職が正常に更新されました！");
             await fetchData();
             setIsEditModalOpen(false);
-        } catch (error: any) {
+        } catch (error: Error) {
             toast.error(`エラー: ${error.message}`);
         }
     };

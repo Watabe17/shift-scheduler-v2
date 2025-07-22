@@ -1,16 +1,12 @@
 "use client";
 
 import { useState, FormEvent } from 'react';
-import { Position, RequiredStaff } from "@prisma/client";
+import { Position, RequiredStaff, PositionWithStaff } from "./../types/models";
 import { toast } from 'react-toastify';
-
-interface PositionWithStaff extends Position {
-  requiredStaffs: RequiredStaff[];
-}
 
 interface RequiredStaffManagerProps {
   position: PositionWithStaff;
-  onUpdate: () => void;
+  onUpdate: (id: string, name: string) => Promise<void>;
 }
 
 const DAYS_OF_WEEK = [
@@ -41,9 +37,9 @@ export default function RequiredStaffManager({ position, onUpdate }: RequiredSta
       toast.success("ルールを追加しました。");
       setTimeSlot('');
       setCount(1);
-      onUpdate(); // 親コンポーネントのデータ再取得をトリガー
-    } catch (error: any) {
-      toast.error(error.message);
+      onUpdate(position.id, position.name); // 親コンポーネントのデータ再取得をトリガー
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : String(error));
     }
   };
 
@@ -60,9 +56,9 @@ export default function RequiredStaffManager({ position, onUpdate }: RequiredSta
         });
         if (!res.ok) throw new Error("人数の更新に失敗しました。");
         toast.success("人数を更新しました。");
-        onUpdate();
-    } catch (error: any) {
-        toast.error(error.message);
+        onUpdate(position.id, position.name);
+    } catch (error: unknown) {
+        toast.error(error instanceof Error ? error.message : String(error));
     }
   };
 
@@ -72,9 +68,9 @@ export default function RequiredStaffManager({ position, onUpdate }: RequiredSta
         const res = await fetch(`/api/admin/required-staff/${ruleId}`, { method: 'DELETE' });
         if (!res.ok) throw new Error("ルールの削除に失敗しました。");
         toast.success("ルールを削除しました。");
-        onUpdate();
-    } catch (error: any) {
-        toast.error(error.message);
+        onUpdate(position.id, position.name);
+    } catch (error: unknown) {
+        toast.error(error instanceof Error ? error.message : String(error));
     }
   };
 

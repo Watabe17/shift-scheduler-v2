@@ -113,7 +113,7 @@ export default function EmployeeShiftsPage() {
     doc.text(title, 14, 20);
 
     const tableColumn = ["日付", "曜日", "ポジション", "勤務時間"];
-    const tableRows: any[][] = [];
+    const tableRows: string[][] = [];
     const sortedEvents = [...events].sort((a,b) => (a.start as Date).getTime() - (b.start as Date).getTime());
 
     sortedEvents.forEach(event => {
@@ -136,7 +136,9 @@ export default function EmployeeShiftsPage() {
         const totalHoursText = `合計勤務時間: ${totalHours.totalHours}時間 ${totalHours.totalMinutes}分`;
         const textWidth = doc.getStringUnitWidth(totalHoursText) * doc.getFontSize() / doc.internal.scaleFactor;
         const textX = doc.internal.pageSize.getWidth() - 14 - textWidth;
-        const lastTableY = (doc as any).lastAutoTable.finalY;
+        // autoTableの戻り値を利用してfinalYを取得
+        const autoTableResult = (doc as any).lastAutoTable;
+        const lastTableY = autoTableResult ? autoTableResult.finalY : 40;
         doc.text(totalHoursText, textX, lastTableY + 10);
     }
 

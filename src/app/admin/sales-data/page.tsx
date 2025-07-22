@@ -42,8 +42,8 @@ export default function SalesDataPage() {
       const fileInput = document.getElementById('csv-upload') as HTMLInputElement;
       if(fileInput) fileInput.value = '';
 
-    } catch (error: any) {
-      toast.error(`エラー: ${error.message}`);
+    } catch (error: unknown) {
+      toast.error(`エラー: ${error instanceof Error ? error.message : String(error)}`);
     } finally {
       setIsUploading(false);
     }

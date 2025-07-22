@@ -3,11 +3,11 @@
 import { useState, useCallback } from "react";
 import { format, addDays, startOfWeek, eachDayOfInterval, isSameDay } from "date-fns";
 import { ja } from "date-fns/locale";
-import { Position, User, Shift, ShiftRequest as PrismaShiftRequest } from '@prisma/client';
-import { useDrop } from 'react-dnd';
+import { Position, User, Shift, ShiftRequest } from "../types/models";
+import { useDrop, DropTargetMonitor } from 'react-dnd';
 
 type FullShift = Shift & { user: User, position: Position, shiftRequestId: string | null };
-type ShiftRequest = PrismaShiftRequest & { user: User, position: Position, shift?: Shift | null };
+type ShiftRequestWithDetails = ShiftRequest & { user: User, position: Position, shift?: Shift | null };
 
 const ItemTypes = { SHIFT_REQUEST: "shift_request" };
 
@@ -17,7 +17,7 @@ type DailyShiftCalendarProps = {
   shifts: FullShift[];
   employees: User[];
   positions: Position[];
-  onDrop: (item: ShiftRequest, date: Date, positionId: string) => void;
+  onDrop: (item: ShiftRequestWithDetails, date: Date, positionId: string) => void;
   onShiftClick: (shift: FullShift) => void;
   onSaveShift: (shiftData: Partial<Shift>, isNew: boolean) => Promise<void>;
   onDeleteShift: () => Promise<void>;
@@ -89,16 +89,16 @@ const DailyShiftCalendar = ({
                   );
 
                   // Drop target for new shifts
-                  const [{ isOver }, drop] = useDrop(() => ({
+                  const [{ isOver }, drop] = useDrop<ShiftRequestWithDetails, void, { isOver: boolean }>({
                     accept: ItemTypes.SHIFT_REQUEST,
-                    drop: (item: ShiftRequest) => onDrop(item, day, item.position.id),
-                    collect: monitor => ({ isOver: monitor.isOver() }),
-                  }));
+                    drop: (item: ShiftRequestWithDetails) => onDrop(item, day, item.position.id),
+                    collect: (monitor: DropTargetMonitor) => ({ isOver: monitor.isOver() }),
+                  });
 
                   return (
                     <div
                       key={day.toISOString()}
-                      ref={drop as any}
+                      ref={drop}
                       className={`day-cell relative w-48 flex-shrink-0 border-r min-h-[160px] ${isOver ? 'bg-blue-50' : ''}`}
                       onClick={() => onNewShiftClick(day)} // Allow creating new shifts by clicking on a day cell
                     >
