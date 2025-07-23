@@ -52,6 +52,13 @@ const adminMenu = [
     description: "従業員アカウントを追加または管理します。",
     icon: UserPlusIcon,
     color: "bg-red-500",
+  },
+  {
+    href: "/admin/employees/create",
+    title: "従業員作成",
+    description: "新しい従業員アカウントを作成します。",
+    icon: UserPlusIcon,
+    color: "bg-green-500",
   }
 ];
 
@@ -98,7 +105,7 @@ export default function AdminDashboard() {
     fetchStats();
   }, []);
 
-  if (session?.user.role !== "ADMIN") {
+  if ((session?.user as any)?.role !== "ADMIN") {
     // This will be handled by the onUnauthenticated callback, but as a fallback
     return <div className="min-h-screen bg-gray-100 flex items-center justify-center">アクセス拒否</div>;
   }

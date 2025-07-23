@@ -5,7 +5,13 @@ export type User = {
   email?: string | null;
   image?: string | null;
 };
-// 今後、PositionやShiftなどもここに追加予定 
+
+export type Employee = {
+  id: string;
+  name: string;
+  email: string;
+  positions: Position[];
+}; 
 
 export type Position = {
   id: string;
@@ -36,7 +42,12 @@ export type PositionWithStaff = Position & {
   requiredStaffs: RequiredStaff[];
 }; 
 
-export type ShiftStatus = 'DRAFT' | 'CONFIRMED'; 
+export type ShiftStatus = 'DRAFT' | 'CONFIRMED';
+
+export const ShiftStatus = {
+  DRAFT: 'DRAFT' as const,
+  CONFIRMED: 'CONFIRMED' as const,
+} as const; 
 
 export type Shift = {
   id: string;

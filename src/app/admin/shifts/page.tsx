@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
-import { Position, Shift, ShiftStatus, User } from "../../types/models";
+import { Position, Shift, ShiftStatus, User } from "../../../types/models";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ShiftEditModal from "@/components/ShiftEditModal";
@@ -50,7 +50,7 @@ export default function ShiftsManagementPage() {
   const [draftShifts, setDraftShifts] = useState<ShiftWithRelations[]>([]);
   const [confirmedShifts, setConfirmedShifts] = useState<ShiftWithRelations[]>([]);
   const [positions, setPositions] = useState<Position[]>([]);
-  const [employees, setEmployees] = useState<User[]>([]);
+  const [employees, setEmployees] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'draft' | 'confirmed'>('draft');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -70,7 +70,7 @@ export default function ShiftsManagementPage() {
       const draftData: ShiftWithRelations[] = await draftRes.json();
       const confirmedData: ShiftWithRelations[] = await confirmedRes.json();
       const positionsData = await positionsRes.json();
-      const employeesData: User[] = await employeesRes.json();
+      const employeesData: any[] = await employeesRes.json();
 
       setDraftShifts(draftData);
       setConfirmedShifts(confirmedData);

@@ -237,9 +237,17 @@ export default function EmployeesPage() {
 
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold text-gray-800">従業員管理</h1>
-                <button onClick={() => setIsAddModalOpen(true)} className="px-4 py-2 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700">
-                    + 従業員を追加
-                </button>
+                <div className="flex gap-2">
+                    <button 
+                        onClick={() => window.location.href = '/admin/employees/create'} 
+                        className="px-4 py-2 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700"
+                    >
+                        + 新規従業員作成
+                    </button>
+                    <button onClick={() => setIsAddModalOpen(true)} className="px-4 py-2 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700">
+                        + 従業員を追加
+                    </button>
+                </div>
             </div>
 
             <div className="bg-white shadow-md rounded-lg overflow-x-auto">
