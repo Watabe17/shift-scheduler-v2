@@ -35,7 +35,7 @@ const ItemTypes = { SHIFT_REQUEST: "shift_request" };
 
 // --- ドラッグ可能な申請カードコンポーネント ---
 const DraggableShiftRequest = ({ request }: { request: ShiftRequest }) => {
-  const [{ isDragging }, drag] = useDrag<{ /* item型 */ }, void, { isDragging: boolean }>({
+  const [{ isDragging }, drag] = useDrag<ShiftRequest, void, { isDragging: boolean }>({
     type: ItemTypes.SHIFT_REQUEST,
     item: { ...request },
     collect: (monitor: { isDragging: () => boolean }) => ({
