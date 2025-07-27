@@ -69,10 +69,94 @@ model VerificationToken {
 
 // ここから下に、PositionやShiftRequestなど、
 // あなたのアプリケーションで必要なモデルを追加していきます。
-// 例：
-// model Position {
-//   id   String @id @default(cuid())
-//   name String @unique
-//
-//   @@map("positions")
-// }
+
+model Position {
+  id            String         @id @default(cuid())
+  name          String         @unique
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  
+  // リレーション
+  shiftRequests ShiftRequest[]
+  shifts        Shift[]
+  requiredStaffs RequiredStaff[]
+  employees     EmployeePosition[]
+
+  @@map("positions")
+}
+
+model Employee {
+  id        String    @id @default(cuid())
+  name      String
+  email     String    @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  
+  // リレーション
+  positions     EmployeePosition[]
+  shiftRequests ShiftRequest[]
+  shifts        Shift[]
+
+  @@map("employees")
+}
+
+model EmployeePosition {
+  id         String   @id @default(cuid())
+  employeeId String
+  positionId String
+  createdAt  DateTime @default(now())
+  
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  position   Position @relation(fields: [positionId], references: [id], onDelete: Cascade)
+
+  @@unique([employeeId, positionId])
+  @@map("employee_positions")
+}
+
+model ShiftRequest {
+  id         String   @id @default(cuid())
+  userId     String
+  positionId String
+  date       String
+  startTime  String
+  endTime    String
+  status     String   @default("PENDING")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  
+  employee   Employee @relation(fields: [userId], references: [id], onDelete: Cascade)
+  position   Position @relation(fields: [positionId], references: [id], onDelete: Cascade)
+
+  @@map("shift_requests")
+}
+
+model Shift {
+  id         String   @id @default(cuid())
+  userId     String
+  positionId String
+  date       String
+  startTime  String
+  endTime    String
+  status     String   @default("DRAFT")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  
+  employee   Employee @relation(fields: [userId], references: [id], onDelete: Cascade)
+  position   Position @relation(fields: [positionId], references: [id], onDelete: Cascade)
+
+  @@map("shifts")
+}
+
+model RequiredStaff {
+  id         String   @id @default(cuid())
+  positionId String
+  dayOfWeek  Int
+  timeSlot   String
+  count      Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  
+  position   Position @relation(fields: [positionId], references: [id], onDelete: Cascade)
+
+  @@map("required_staffs")
+}
