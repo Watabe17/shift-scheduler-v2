@@ -33,7 +33,7 @@ const DayCell = ({
   timeSlots
 }: DayCellProps) => {
   const shiftsForEmployeeAndDay = shifts.filter(
-    shift => isSameDay(new Date(shift.date), day) && shift.userId === employee.id
+    shift => isSameDay(new Date(shift.date), day) && shift.user.id === employee.id
   );
 
   const [{ isOver }, drop] = useDrop<ShiftRequestWithDetails, void, { isOver: boolean }>({
