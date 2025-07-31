@@ -319,7 +319,7 @@ export default function ShiftCreationPage() {
       startTime: '09:00',
       endTime: '17:00',
       status: 'DRAFT',
-      userId: '',
+      employeeId: '',
       positionId: '',
       createdAt: new Date(),
       updatedAt: new Date(),
