@@ -278,7 +278,7 @@ export default function ShiftCreationPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          userId: request.user.id,
+          employeeId: request.user.id,
           positionId: positionId, // ドロップされたレーンのポジションIDを使用
           date: formattedDate,
           startTime: request.startTime,

@@ -90,7 +90,7 @@ const ShiftRequestPage = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          userId: session.user.id,
+          employeeId: session.user.id,
           date: format(selectedDate, "yyyy-MM-dd"),
           positionId: data.positionId,
           startTime: data.startTime,

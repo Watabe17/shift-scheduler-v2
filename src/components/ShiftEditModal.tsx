@@ -22,7 +22,7 @@ export default function ShiftEditModal({ isOpen, onClose, onSave, onUpdate, shif
     startTime: "",
     endTime: "",
     positionId: "",
-    userId: "",
+    employeeId: "",
   });
 
   useEffect(() => {
@@ -32,7 +32,7 @@ export default function ShiftEditModal({ isOpen, onClose, onSave, onUpdate, shif
         startTime: "",
         endTime: "",
         positionId: "",
-        userId: "",
+        employeeId: "",
       });
     } else if (shift) {
       const dateString = new Date(shift.date).toISOString().split("T")[0];
@@ -42,7 +42,7 @@ export default function ShiftEditModal({ isOpen, onClose, onSave, onUpdate, shif
         startTime: shift.startTime,
         endTime: shift.endTime,
         positionId: shift.positionId,
-        userId: shift.userId,
+        employeeId: shift.employeeId,
       });
     }
   }, [shift, isCreating]);
@@ -76,11 +76,11 @@ export default function ShiftEditModal({ isOpen, onClose, onSave, onUpdate, shif
         <form onSubmit={handleSubmit}>
           {isCreating && (
             <div className="mb-4">
-              <label htmlFor="userId" className="block text-sm font-medium text-gray-700 mb-1">従業員</label>
+              <label htmlFor="employeeId" className="block text-sm font-medium text-gray-700 mb-1">従業員</label>
               <select
-                id="userId"
-                name="userId"
-                value={formData.userId}
+                id="employeeId"
+                name="employeeId"
+                value={formData.employeeId}
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                 required
