@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
-import { Position, Shift, ShiftStatus } from "@/types/models";
+import { Position, Shift } from "@/types/models";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ShiftEditModal from "@/components/ShiftEditModal";
@@ -60,8 +60,8 @@ export default function ShiftsManagementPage() {
     setIsLoading(true);
     try {
       const [draftRes, confirmedRes, positionsRes, employeesRes] = await Promise.all([
-        fetch(`/api/admin/shifts?status=${ShiftStatus.DRAFT}`),
-        fetch(`/api/admin/shifts?status=${ShiftStatus.CONFIRMED}`),
+        fetch(`/api/admin/shifts?status=DRAFT`),
+        fetch(`/api/admin/shifts?status=CONFIRMED`),
         fetch("/api/positions"),
         fetch("/api/admin/employees"),
       ]);
