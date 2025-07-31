@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useSession } from "next-auth/react";
 import { toast } from "react-toastify";
-import { Position, ShiftRequest, RequiredStaff, User } from "../../types/models";
+import { Position, ShiftRequest, RequiredStaff, User } from "@/types/models";
 import EmployeeShiftRequestModal from "@/components/EmployeeShiftRequestModal";
 import { format, startOfWeek, getDay, isSameDay, startOfMonth, endOfMonth, eachDayOfInterval, addMonths, subMonths, isSameMonth, endOfWeek } from "date-fns";
 import { ja } from 'date-fns/locale';

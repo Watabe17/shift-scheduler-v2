@@ -359,28 +359,6 @@ export default function ShiftCreationPage() {
     await handleSaveShift(updatedData, false);
   };
 
-  const handleDeleteShift = useCallback(async () => {
-    if (!selectedShift) return;
-    if (!confirm("Are you sure you want to delete this shift?")) return;
-
-    try {
-      const res = await fetch(`/api/admin/shifts/${selectedShift.id}`, {
-        method: "DELETE",
-      });
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || "Failed to delete shift.");
-      }
-      const year = currentMonth.getFullYear();
-      const month = currentMonth.getMonth() + 1;
-      await fetchAllData(year, month);
-      toast.success("Shift deleted successfully!");
-      handleCloseModal();
-    } catch (err: unknown) {
-        toast.error(`Error: ${err instanceof Error ? err.message : String(err)}`);
-    }
-  }, [selectedShift, fetchAllData, handleCloseModal, currentMonth]);
-
   const handleDownloadPdf = async () => {
     if (!font) {
         toast.error("フォントが読み込まれていません。");
