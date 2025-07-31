@@ -14,7 +14,7 @@ import { User, Position, EmployeeWithPositions as Employee } from "@/types/model
 interface AddEmployeeModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onAdd: (data: Omit<User, 'id' | 'role' | 'createdAt' | 'emailVerified'> & { password_hash: string, positionIds: string[] }) => Promise<void>;
+    onAdd: (data: Omit<User, 'id' | 'role' | 'createdAt' | 'emailVerified'> & { password: string, image?: string | null, positionIds: string[] }) => Promise<void>;
     positions: Position[];
 }
 
@@ -38,7 +38,7 @@ const AddEmployeeModal = ({ isOpen, onClose, onAdd, positions }: AddEmployeeModa
         setIsLoading(true);
         try {
             // パスワードをハッシュ化する処理はAPI側で行う想定
-            await onAdd({ name, email, password_hash: password, positionIds: selectedPositions });
+            await onAdd({ name, email, password: password, image: null, positionIds: selectedPositions });
         } finally {
             setIsLoading(false);
         }
@@ -189,7 +189,7 @@ export default function EmployeesPage() {
         fetchData();
     }, [fetchData]);
 
-    const handleAddEmployee = async (data: Omit<User, 'id' | 'role' | 'createdAt'| 'emailVerified'> & { password_hash: string, positionIds: string[] }) => {
+    const handleAddEmployee = async (data: Omit<User, 'id' | 'role' | 'createdAt'| 'emailVerified'> & { password: string, image?: string | null, positionIds: string[] }) => {
         try {
             const res = await fetch('/api/admin/employees', {
                 method: 'POST',
