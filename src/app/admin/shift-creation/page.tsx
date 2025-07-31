@@ -558,10 +558,8 @@ export default function ShiftCreationPage() {
             ) : (
               <DailyShiftCalendar
                 currentDate={currentMonth}
-                onDateChange={setCurrentMonth}
                 shifts={shifts}
                 employees={employees}
-                positions={positions}
                 onDrop={handleDropOnCalendar}
                 onShiftClick={handleShiftClick}
                 onSaveShift={handleSaveShift}
