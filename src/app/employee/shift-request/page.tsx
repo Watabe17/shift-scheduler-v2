@@ -266,7 +266,7 @@ const ShiftRequestPage = () => {
 
               <div className="mt-1 pt-1 border-t border-gray-100 flex-grow overflow-y-auto text-xs space-y-1">
                  {requestsOnDay.map(req => {
-                    const isOwner = req.userId === session?.user?.id;
+                    const isOwner = req.user.id === session?.user?.id;
                      return (
                      <div 
                         key={req.id} 
