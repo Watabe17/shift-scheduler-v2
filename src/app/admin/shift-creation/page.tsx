@@ -562,8 +562,6 @@ export default function ShiftCreationPage() {
                 employees={employees}
                 onDrop={handleDropOnCalendar}
                 onShiftClick={handleShiftClick}
-                onSaveShift={handleSaveShift}
-                onDeleteShift={handleDeleteShift}
                 onNewShiftClick={handleNewShiftClick}
               />
             )}
