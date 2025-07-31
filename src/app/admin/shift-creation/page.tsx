@@ -315,14 +315,14 @@ export default function ShiftCreationPage() {
   const handleNewShiftClick = useCallback((date: Date) => {
     setSelectedShift({
       id: '',
-      date: date,
+      date: date.toISOString(),
       startTime: '09:00',
       endTime: '17:00',
       status: 'DRAFT',
       userId: '',
       positionId: '',
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
       user: {} as User,
       position: {} as Position,
       shiftRequestId: null,
