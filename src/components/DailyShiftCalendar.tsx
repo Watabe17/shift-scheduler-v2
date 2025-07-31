@@ -44,7 +44,7 @@ const DayCell = ({
 
   return (
     <div
-      ref={drop}
+      ref={drop as React.LegacyRef<HTMLDivElement>}
       className={`day-cell relative w-48 flex-shrink-0 border-r min-h-[160px] ${isOver ? 'bg-blue-50' : ''}`}
       onClick={() => onNewShiftClick(day)} // Allow creating new shifts by clicking on a day cell
     >

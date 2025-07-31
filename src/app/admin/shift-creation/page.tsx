@@ -45,7 +45,7 @@ const DraggableShiftRequest = ({ request }: { request: ShiftRequestWithDetails }
 
   return (
     <div
-      ref={drag as any}
+      ref={drag as React.LegacyRef<HTMLDivElement>}
       className={`p-2 my-1 border rounded-md ${
         isDragging ? 'opacity-50 cursor-grabbing' : 'opacity-100 cursor-grab'
       }`}
@@ -69,7 +69,7 @@ const PositionLane = ({ position, shifts, onDrop, onShiftClick }: { position: Po
     });
 
     return (
-        <div ref={drop as any} className={`p-2 rounded-md transition-colors min-h-[50px] ${isOver && canDrop ? 'bg-green-100' : 'bg-gray-50'}`}>
+        <div ref={drop as React.LegacyRef<HTMLDivElement>} className={`p-2 rounded-md transition-colors min-h-[50px] ${isOver && canDrop ? 'bg-green-100' : 'bg-gray-50'}`}>
             <p className="text-xs font-semibold text-gray-500 border-b">{position.name}</p>
             <div className="mt-1 space-y-1">
                 {shifts.map(shift => {
@@ -126,7 +126,7 @@ const SimpleCalendar = ({ currentMonth, onMonthChange, shifts, requiredStaff, po
 
     return (
       <div
-        ref={drop as any}
+        ref={drop as React.LegacyRef<HTMLDivElement>}
         className={`border p-2 min-h-[160px] flex flex-col ${
           isCurrentMonth ? 'bg-white' : 'bg-gray-100'
         } ${isOver ? 'bg-blue-50' : ''}`} // ドラッグ中に日付全体を薄くハイライト
