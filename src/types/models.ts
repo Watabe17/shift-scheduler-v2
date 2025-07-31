@@ -19,3 +19,9 @@ export type EmployeeWithPositions = Employee & {
 export type PositionWithStaff = Position & {
   requiredStaffs: RequiredStaff[];
 };
+
+export type ShiftRequestWithDetails = ShiftRequest & {
+  user: User;
+  position: Position;
+  shift?: Shift | null;
+};

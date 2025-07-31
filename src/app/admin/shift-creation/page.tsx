@@ -5,7 +5,7 @@ import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, addMonths, subMonths, isSameDay, getDay } from "date-fns";
 import { ja } from "date-fns/locale";
-import { Position, User, Shift, ShiftRequest, RequiredStaff } from "@/types/models";
+import { Position, User, Shift, ShiftRequestWithDetails, RequiredStaff } from "@/types/models";
 import { toast } from 'react-toastify';
 import ShiftEditModal from "@/components/ShiftEditModal";
 import jsPDF from 'jspdf';
@@ -34,8 +34,8 @@ const shiftTypes: { [key: string]: ShiftType } = {
 const ItemTypes = { SHIFT_REQUEST: "shift_request" };
 
 // --- ドラッグ可能な申請カードコンポーネント ---
-const DraggableShiftRequest = ({ request }: { request: ShiftRequest }) => {
-  const [{ isDragging }, drag] = useDrag<ShiftRequest, void, { isDragging: boolean }>({
+const DraggableShiftRequest = ({ request }: { request: ShiftRequestWithDetails }) => {
+  const [{ isDragging }, drag] = useDrag<ShiftRequestWithDetails, void, { isDragging: boolean }>({
     type: ItemTypes.SHIFT_REQUEST,
     item: { ...request },
     collect: (monitor: { isDragging: () => boolean }) => ({
@@ -58,10 +58,10 @@ const DraggableShiftRequest = ({ request }: { request: ShiftRequest }) => {
 };
 
 // --- レーンコンポーネント ---
-const PositionLane = ({ position, shifts, onDrop, onShiftClick }: { position: Position, shifts: FullShift[], onDrop: (item: ShiftRequest, positionId: string) => void, onShiftClick: (shift: FullShift) => void }) => {
-    const [{ isOver, canDrop }, drop] = useDrop<ShiftRequest, void, { isOver: boolean; canDrop: boolean }>({
+const PositionLane = ({ position, shifts, onDrop, onShiftClick }: { position: Position, shifts: FullShift[], onDrop: (item: ShiftRequestWithDetails, positionId: string) => void, onShiftClick: (shift: FullShift) => void }) => {
+    const [{ isOver, canDrop }, drop] = useDrop<ShiftRequestWithDetails, void, { isOver: boolean; canDrop: boolean }>({
         accept: ItemTypes.SHIFT_REQUEST,
-        drop: (item: ShiftRequest) => onDrop(item, position.id),
+        drop: (item: ShiftRequestWithDetails) => onDrop(item, position.id),
         collect: (monitor: { isOver: () => boolean; canDrop: () => boolean }) => ({
             isOver: monitor.isOver(),
             canDrop: monitor.canDrop(),
@@ -92,7 +92,7 @@ const PositionLane = ({ position, shifts, onDrop, onShiftClick }: { position: Po
 }
 
 // --- シンプルなカレンダーコンポーネント ---
-const SimpleCalendar = ({ currentMonth, onMonthChange, shifts, requiredStaff, positions, onDrop, onShiftClick, onFinalize, isFinalizing, onDownloadPdf }: { currentMonth: Date, onMonthChange: (date: Date) => void, shifts: FullShift[], requiredStaff: RequiredStaffRule[], positions: Position[], onDrop: (item: ShiftRequest, date: Date, positionId: string) => void, onShiftClick: (shift: FullShift) => void, onFinalize: () => void, isFinalizing: boolean, onDownloadPdf: () => void }) => {
+const SimpleCalendar = ({ currentMonth, onMonthChange, shifts, requiredStaff, positions, onDrop, onShiftClick, onFinalize, isFinalizing, onDownloadPdf }: { currentMonth: Date, onMonthChange: (date: Date) => void, shifts: FullShift[], requiredStaff: RequiredStaffRule[], positions: Position[], onDrop: (item: ShiftRequestWithDetails, date: Date, positionId: string) => void, onShiftClick: (shift: FullShift) => void, onFinalize: () => void, isFinalizing: boolean, onDownloadPdf: () => void }) => {
 
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(monthStart);
@@ -118,7 +118,7 @@ const SimpleCalendar = ({ currentMonth, onMonthChange, shifts, requiredStaff, po
     const isCurrentMonth = isSameMonth(day, currentMonth);
 
     // DayCellのdropはもう使わないが、コンテナとしてのdivは残す
-    const [{ isOver }, drop] = useDrop<ShiftRequest, void, { isOver: boolean }>({
+    const [{ isOver }, drop] = useDrop<ShiftRequestWithDetails, void, { isOver: boolean }>({
         accept: ItemTypes.SHIFT_REQUEST,
         collect: (monitor: { isOver: () => boolean }) => ({ isOver: monitor.isOver() }),
     });
@@ -205,7 +205,7 @@ const SimpleCalendar = ({ currentMonth, onMonthChange, shifts, requiredStaff, po
 
 // --- メインページコンポーネント ---
 export default function ShiftCreationPage() {
-  const [requests, setRequests] = useState<ShiftRequest[]>([]);
+  const [requests, setRequests] = useState<ShiftRequestWithDetails[]>([]);
   const [shifts, setShifts] = useState<FullShift[]>([]);
   const [requiredStaff, setRequiredStaff] = useState<RequiredStaffRule[]>([]);
   const [positions, setPositions] = useState<Position[]>([]);
@@ -246,7 +246,7 @@ export default function ShiftCreationPage() {
         throw new Error("Failed to fetch data");
       }
       
-      const requestsData: ShiftRequest[] = await requestsRes.json();
+      const requestsData: ShiftRequestWithDetails[] = await requestsRes.json();
       const shiftsData: FullShift[] = await shiftsRes.json();
       const requiredStaffData: RequiredStaffRule[] = await requiredStaffRes.json();
       const positionsData: Position[] = await positionsRes.json();
@@ -270,7 +270,7 @@ export default function ShiftCreationPage() {
     fetchAllData(year, month);
   }, [currentMonth, fetchAllData]);
 
-  const handleDropOnCalendar = useCallback(async (request: ShiftRequest, date: Date, positionId: string) => {
+  const handleDropOnCalendar = useCallback(async (request: ShiftRequestWithDetails, date: Date, positionId: string) => {
     try {
       const formattedDate = format(date, "yyyy-MM-dd'T'00:00:00.000'Z'");
 
