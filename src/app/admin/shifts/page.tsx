@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
-import { Position, Shift, ShiftStatus, User } from "../../../types/models";
+import { Position, Shift, ShiftStatus } from "@/types/models";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ShiftEditModal from "@/components/ShiftEditModal";

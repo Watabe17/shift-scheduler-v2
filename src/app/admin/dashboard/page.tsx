@@ -10,7 +10,6 @@ import {
   ClipboardDocumentCheckIcon,
   CalendarDaysIcon,
   UsersIcon,
-  UserGroupIcon,
   ExclamationTriangleIcon,
   ClockIcon,
   CheckCircleIcon,

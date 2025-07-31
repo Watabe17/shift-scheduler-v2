@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { User, Position } from "@prisma/client";
+import { useState, useEffect, useCallback } from "react";
+// import { User, Position } from "@prisma/client"; // 不要なインポートを削除
 import { format } from 'date-fns';
 import { ja } from 'date-fns/locale';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { User as AppUser } from "../../types/models";
+import { User, Position, EmployeeWithPositions as Employee } from "@/types/models";
 
 // For simplicity, modals are in the same file. In a real app, extract them.
 
@@ -14,7 +14,7 @@ import { User as AppUser } from "../../types/models";
 interface AddEmployeeModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onAdd: (data: Omit<User, 'id' | 'role' | 'createdAt'> & { positionIds: string[] }) => Promise<void>;
+    onAdd: (data: Omit<User, 'id' | 'role' | 'createdAt' | 'emailVerified'> & { password_hash: string, positionIds: string[] }) => Promise<void>;
     positions: Position[];
 }
 
@@ -37,7 +37,8 @@ const AddEmployeeModal = ({ isOpen, onClose, onAdd, positions }: AddEmployeeModa
         e.preventDefault();
         setIsLoading(true);
         try {
-            await onAdd({ name, email, password, positionIds: selectedPositions });
+            // パスワードをハッシュ化する処理はAPI側で行う想定
+            await onAdd({ name, email, password_hash: password, positionIds: selectedPositions });
         } finally {
             setIsLoading(false);
         }
@@ -93,13 +94,13 @@ const AddEmployeeModal = ({ isOpen, onClose, onAdd, positions }: AddEmployeeModa
 
 
 // EDIT POSITIONS MODAL
-type EmployeeWithPositions = User & { positions: Position[] };
+// type EmployeeWithPositions = User & { positions: Position[] }; // models.ts の Employee を使うので不要
 
 interface EditPositionsModalProps {
     isOpen: boolean;
     onClose: () => void;
     onUpdate: (employeeId: string, positionIds: string[]) => Promise<void>;
-    employee: EmployeeWithPositions | null;
+    employee: Employee | null; // Employee 型を使用
     allPositions: Position[];
 }
 
@@ -109,7 +110,7 @@ const EditPositionsModal = ({ isOpen, onClose, onUpdate, employee, allPositions 
     
     useEffect(() => {
         if (employee) {
-            setSelectedPositionIds(employee.positions.map(p => p.id));
+            setSelectedPositionIds(employee.positions.map((p: Position) => p.id));
         }
     }, [employee]);
 
@@ -158,14 +159,14 @@ const EditPositionsModal = ({ isOpen, onClose, onUpdate, employee, allPositions 
 
 
 export default function EmployeesPage() {
-    const [employees, setEmployees] = useState<EmployeeWithPositions[]>([]);
+    const [employees, setEmployees] = useState<Employee[]>([]); // Employee 型を使用
     const [allPositions, setAllPositions] = useState<Position[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    const [selectedEmployee, setSelectedEmployee] = useState<EmployeeWithPositions | null>(null);
+    const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null); // Employee 型を使用
 
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         setIsLoading(true);
         try {
             const [empRes, posRes] = await Promise.all([
@@ -177,18 +178,18 @@ export default function EmployeesPage() {
             const posData = await posRes.json();
             setEmployees(empData);
             setAllPositions(posData);
-        } catch (error: Error) {
+        } catch (error: any) {
             toast.error(`エラー: ${error.message}`);
         } finally {
             setIsLoading(false);
         }
-    };
+    }, []);
 
     useEffect(() => {
         fetchData();
-    }, []);
+    }, [fetchData]);
 
-    const handleAddEmployee = async (data: Omit<User, 'id' | 'role' | 'createdAt'> & { positionIds: string[] }) => {
+    const handleAddEmployee = async (data: Omit<User, 'id' | 'role' | 'createdAt'| 'emailVerified'> & { password_hash: string, positionIds: string[] }) => {
         try {
             const res = await fetch('/api/admin/employees', {
                 method: 'POST',
@@ -202,7 +203,7 @@ export default function EmployeesPage() {
             toast.success("従業員が正常に追加されました！");
             await fetchData();
             setIsAddModalOpen(false);
-        } catch (error: Error) {
+        } catch (error: any) {
             toast.error(`エラー: ${error.message}`);
             throw error;
         }
@@ -219,12 +220,12 @@ export default function EmployeesPage() {
             toast.success("役職が正常に更新されました！");
             await fetchData();
             setIsEditModalOpen(false);
-        } catch (error: Error) {
+        } catch (error: any) {
             toast.error(`エラー: ${error.message}`);
         }
     };
 
-    const handleOpenEditModal = (employee: EmployeeWithPositions) => {
+    const handleOpenEditModal = (employee: Employee) => { // Employee 型を使用
         setSelectedEmployee(employee);
         setIsEditModalOpen(true);
     };
@@ -277,12 +278,12 @@ export default function EmployeesPage() {
                                     </td>
                                     <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                                         <p className="text-gray-900 whitespace-no-wrap">
-                                            {employee.positions.map(p => p.name).join(', ') || 'なし'}
+                                            {employee.positions.map((p: Position) => p.name).join(', ') || 'なし'}
                                         </p>
                                     </td>
                                     <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                                         <p className="text-gray-900 whitespace-no-wrap">
-                                            {format(new Date(employee.createdAt), 'yyyy年MM月dd日', { locale: ja })}
+                                            {employee.createdAt ? format(new Date(employee.createdAt), 'yyyy年MM月dd日', { locale: ja }) : 'N/A'}
                                         </p>
                                     </td>
                                     <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">

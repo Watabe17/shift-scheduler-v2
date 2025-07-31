@@ -5,7 +5,7 @@ import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, addMonths, subMonths, isSameDay, getDay } from "date-fns";
 import { ja } from "date-fns/locale";
-import { Position, User, Shift, ShiftRequest, RequiredStaff, PositionWithStaff } from "../../types/models";
+import { Position, User, Shift, ShiftRequest, RequiredStaff } from "@/types/models";
 import { toast } from 'react-toastify';
 import ShiftEditModal from "@/components/ShiftEditModal";
 import jsPDF from 'jspdf';
@@ -233,7 +233,7 @@ export default function ShiftCreationPage() {
     loadFont();
   }, []);
 
-  const fetchAllData = async (year: number, month: number) => {
+  const fetchAllData = useCallback(async (year: number, month: number) => {
     try {
       const [requestsRes, shiftsRes, requiredStaffRes, positionsRes, employeesRes] = await Promise.all([
         fetch("/api/admin/shift-requests?status=approved"),
@@ -262,13 +262,13 @@ export default function ShiftCreationPage() {
       console.error(error);
       toast.error("データの取得に失敗しました。");
     }
-  };
+  }, []);
 
   useEffect(() => {
     const year = currentMonth.getFullYear();
     const month = currentMonth.getMonth() + 1;
     fetchAllData(year, month);
-  }, [currentMonth]);
+  }, [currentMonth, fetchAllData]);
 
   const handleDropOnCalendar = useCallback(async (request: ShiftRequest, date: Date, positionId: string) => {
     try {

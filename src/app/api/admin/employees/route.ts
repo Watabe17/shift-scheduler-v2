@@ -40,6 +40,7 @@ export async function POST(request: NextRequest) {
     });
 
     // パスワードを除いて返す
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password: _, ...employeeWithoutPassword } = newEmployee;
 
     return NextResponse.json(employeeWithoutPassword, { status: 201 });

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, FormEvent } from 'react';
-import { Position, RequiredStaff, PositionWithStaff } from "./../types/models";
+import { PositionWithStaff } from "@/types/models";
 import { toast } from 'react-toastify';
 
 interface RequiredStaffManagerProps {

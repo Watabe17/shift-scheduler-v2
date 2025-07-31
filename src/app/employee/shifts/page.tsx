@@ -43,29 +43,24 @@ export default function EmployeeShiftsPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [totalHours, setTotalHours] = useState<TotalHours | null>(null);
   const [requiredStaff, setRequiredStaff] = useState<RequiredStaffRule[]>([]);
-  const [positions, setPositions] = useState<Position[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
 
   const fetchAllData = useCallback(async (date: Date) => {
-    setIsLoading(true);
     try {
       const year = date.getFullYear();
       const month = date.getMonth() + 1;
 
-      const [shiftsRes, requiredStaffRes, positionsRes, totalHoursRes] = await Promise.all([
+      const [shiftsRes, requiredStaffRes, totalHoursRes] = await Promise.all([
         fetch(`/api/shifts?year=${year}&month=${month}`),
         fetch("/api/admin/required-staff"),
-        fetch("/api/admin/positions"),
         fetch(`/api/shifts/total-hours?year=${year}&month=${month}`),
       ]);
 
-      if (!shiftsRes.ok || !requiredStaffRes.ok || !positionsRes.ok || !totalHoursRes.ok) {
+      if (!shiftsRes.ok || !requiredStaffRes.ok || !totalHoursRes.ok) {
         throw new Error("データの取得に失敗しました。");
       }
 
       const shifts: Shift[] = await shiftsRes.json();
       const requiredStaffData: RequiredStaffRule[] = await requiredStaffRes.json();
-      const positionsData: Position[] = await positionsRes.json();
       const totalHoursData: TotalHours = await totalHoursRes.json();
       
       const calendarEvents = shifts.map((shift) => {
@@ -82,13 +77,10 @@ export default function EmployeeShiftsPage() {
 
       setEvents(calendarEvents as MyCalendarEvent[]);
       setRequiredStaff(requiredStaffData);
-      setPositions(positionsData);
       setTotalHours(totalHoursData);
 
     } catch (error) {
       console.error(error);
-    } finally {
-      setIsLoading(false);
     }
   }, []);
 

@@ -1,62 +1,20 @@
-// DBスキーマに基づく型定義
-export type User = {
-  id: string;
-  name?: string | null;
-  email?: string | null;
-  image?: string | null;
-};
+// src/types/models.ts
+import { User as PrismaUser, Position as PrismaPosition, RequiredStaff as PrismaRequiredStaff, ShiftRequest as PrismaShiftRequest, Shift as PrismaShift, Employee as PrismaEmployee, SalesData as PrismaSalesData } from '@prisma/client';
 
-export type Employee = {
-  id: string;
-  name: string;
-  email: string;
+export type User = PrismaUser;
+export type Position = PrismaPosition;
+export type RequiredStaff = PrismaRequiredStaff;
+export type ShiftRequest = PrismaShiftRequest;
+export type Shift = PrismaShift;
+export type Employee = PrismaEmployee;
+export type SalesData = PrismaSalesData;
+
+// 必要に応じて、Prismaのモデルにはないがアプリケーション固有の型をここに追加
+// 例: シフト作成画面で使う従業員の情報など
+export type EmployeeWithPositions = Employee & {
   positions: Position[];
-}; 
-
-export type Position = {
-  id: string;
-  name: string;
-};
-
-export type ShiftRequest = {
-  id: string;
-  userId: string;
-  positionId: string;
-  date: string;
-  startTime: string;
-  endTime: string;
-  status: string;
-  createdAt?: string;
-  updatedAt?: string;
-};
-
-export type RequiredStaff = {
-  id: string;
-  positionId: string;
-  dayOfWeek: number;
-  timeSlot: string;
-  count: number;
 };
 
 export type PositionWithStaff = Position & {
   requiredStaffs: RequiredStaff[];
-}; 
-
-export type ShiftStatus = 'DRAFT' | 'CONFIRMED';
-
-export const ShiftStatus = {
-  DRAFT: 'DRAFT' as const,
-  CONFIRMED: 'CONFIRMED' as const,
-} as const; 
-
-export type Shift = {
-  id: string;
-  userId: string;
-  positionId: string;
-  date: string;
-  startTime: string;
-  endTime: string;
-  status: string;
-  createdAt?: string;
-  updatedAt?: string;
-}; 
+};

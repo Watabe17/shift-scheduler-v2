@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
-import { BellIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
+import { BellIcon } from '@heroicons/react/24/outline';
 import { useSession } from 'next-auth/react';
 import { Notification } from '@prisma/client';
 import { formatDistanceToNow } from 'date-fns';

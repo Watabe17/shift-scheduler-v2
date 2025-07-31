@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, FormEvent } from "react";
-import { Position, RequiredStaff, PositionWithStaff } from "../types/models";
+import { PositionWithStaff } from "@/types/models";
 import RequiredStaffManager from "@/components/RequiredStaffManager";
 import { toast } from "react-toastify";
 

@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useCallback } from "react";
 import { format, addDays, startOfWeek, eachDayOfInterval, isSameDay } from "date-fns";
 import { ja } from "date-fns/locale";
 import { Position, User, Shift, ShiftRequest } from "../types/models";
@@ -75,27 +74,19 @@ const DayCell = ({
 
 type DailyShiftCalendarProps = {
   currentDate: Date;
-  onDateChange: (date: Date) => void;
   shifts: FullShift[];
   employees: User[];
-  positions: Position[];
   onDrop: (item: ShiftRequestWithDetails, date: Date, positionId: string) => void;
   onShiftClick: (shift: FullShift) => void;
-  onSaveShift: (shiftData: Partial<Shift>, isNew: boolean) => Promise<void>;
-  onDeleteShift: () => Promise<void>;
   onNewShiftClick: (date: Date) => void;
 };
 
 const DailyShiftCalendar = ({
   currentDate,
-  onDateChange,
   shifts,
   employees,
-  positions,
   onDrop,
   onShiftClick,
-  onSaveShift,
-  onDeleteShift,
   onNewShiftClick
 }: DailyShiftCalendarProps) => {
   const startOfCurrentWeek = startOfWeek(currentDate, { weekStartsOn: 0 }); // 週の始まり（日曜日）
@@ -169,4 +160,4 @@ const DailyShiftCalendar = ({
   );
 };
 
-export default DailyShiftCalendar; 
+export default DailyShiftCalendar;
