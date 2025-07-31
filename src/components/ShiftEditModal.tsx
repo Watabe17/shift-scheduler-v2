@@ -59,7 +59,7 @@ export default function ShiftEditModal({ isOpen, onClose, onSave, onUpdate, shif
     const dataToSend = {
       id: isCreating ? undefined : shift?.id,
       ...formData,
-      date: new Date(formData.date),
+      date: formData.date,
     };
 
     if (isCreating) {
