@@ -18,16 +18,18 @@
     "@types/bcryptjs": "^2.4.6",
     "bcryptjs": "^3.0.2",
     "date-fns": "^3.6.0",
+    "dotenv": "^17.2.1",
+    "eslint-config-next": "^15.4.5",
     "jspdf": "^3.0.1",
     "jspdf-autotable": "^5.0.2",
-    "next": "15.4.2",
+    "next": "^15.4.5",
     "next-auth": "^4.24.11",
     "prisma": "^6.12.0",
-    "react": "19.1.0",
+    "react": "19.1.1",
     "react-big-calendar": "^1.19.4",
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
-    "react-dom": "19.1.0",
+    "react-dom": "19.1.1",
     "react-toastify": "^11.0.5"
   },
   "devDependencies": {
@@ -38,9 +40,8 @@
     "@types/react-big-calendar": "^1.16.2",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "15.4.2",
     "tailwindcss": "^4",
     "ts-node": "^10.9.2",
-    "typescript": "^5"
+    "typescript": "^5.9.2"
   }
 }

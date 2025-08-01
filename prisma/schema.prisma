@@ -89,6 +89,8 @@ model Employee {
   id        String    @id @default(cuid())
   name      String
   email     String    @unique
+  password  String
+  role      String    @default("employee")
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   
@@ -116,8 +118,8 @@ model EmployeePosition {
 model ShiftRequest {
   id         String   @id @default(cuid())
   employeeId String
-  positionId String
-  date       String
+  positionId String? // オプショナルに変更
+  date       DateTime @db.Date
   startTime  String
   endTime    String
   status     String   @default("PENDING")
@@ -125,7 +127,7 @@ model ShiftRequest {
   updatedAt  DateTime @updatedAt
   
   employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-  position   Position @relation(fields: [positionId], references: [id], onDelete: Cascade)
+  position   Position? @relation(fields: [positionId], references: [id])
 
   @@map("shift_requests")
 }
