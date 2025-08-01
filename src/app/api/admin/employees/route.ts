@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { hash } from 'bcryptjs';
-import prisma from '@/lib/prisma';
+import { prisma } from '@/lib/prisma';
 
 export async function POST(request: NextRequest) {
   try {
-    const { name, email, password } = await request.json();
+    const { name, email, password } from await request.json();
 
     // バリデーション
     if (!name || !email || !password) {
@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     }
 
     // メールアドレスの重複チェック
-    const existingUser = await prisma.user.findUnique({
+    const existingUser = await prisma.employee.findUnique({
       where: { email },
     });
 
@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     const hashedPassword = await hash(password, 10);
 
     // 従業員アカウントを作成
-    const newEmployee = await prisma.user.create({
+    const newEmployee = await prisma.employee.create({
       data: {
         name,
         email,
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   try {
     // 従業員一覧を取得（管理者以外）
-    const employees = await prisma.user.findMany({
+    const employees = await prisma.employee.findMany({
       where: {
         role: 'USER',
       },
@@ -79,4 +79,4 @@ export async function GET() {
       { status: 500 }
     );
   }
-} 
+}
