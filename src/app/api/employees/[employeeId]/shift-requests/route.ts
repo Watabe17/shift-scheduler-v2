@@ -3,9 +3,9 @@ import { prisma } from '../../../../../lib/prisma';
 
 export async function GET(
   request: Request,
-  { params }: { params: { employeeId: string } }
+  context: { params: { employeeId: string } }
 ) {
-  const { employeeId } = params;
+  const { employeeId } = context.params;
 
   if (!employeeId) {
     return NextResponse.json({ error: '従業員IDが必要です。' }, { status: 400 });
