@@ -27,7 +27,9 @@ const EmployeeDashboard = () => {
   useEffect(() => {
     if (session) {
       const fetchShifts = async () => {
-        const res = await fetch('/api/shifts');
+        const year = currentMonth.getFullYear();
+        const month = currentMonth.getMonth() + 1;
+        const res = await fetch(`/api/shifts?year=${year}&month=${month}`);
         if (res.ok) {
           const data = await res.json();
           setShifts(data);
@@ -35,7 +37,7 @@ const EmployeeDashboard = () => {
       };
       fetchShifts();
     }
-  }, [session]);
+  }, [session, currentMonth]);
 
   const calendarDays = useMemo(() => {
     const monthStart = startOfMonth(currentMonth);
@@ -61,10 +63,18 @@ const EmployeeDashboard = () => {
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow-sm">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-            <h1 className="text-xl font-bold text-gray-800">
-                マイダッシュボード
-            </h1>
             <div className="flex items-center gap-4">
+                <h1 className="text-lg text-gray-700">
+                    {session?.user?.name || 'ユーザー'}さん、こんにちは
+                </h1>
+            </div>
+            <div className="flex items-center gap-4">
+                <a 
+                    href="/employee/shift-request" 
+                    className="px-4 py-2 font-semibold text-white bg-blue-500 rounded hover:bg-blue-600"
+                >
+                    希望シフト提出
+                </a>
                 <NotificationBell />
                 <LogoutButton />
             </div>
@@ -77,7 +87,7 @@ const EmployeeDashboard = () => {
             &lt; 前月
           </button>
           <h2 className="text-2xl font-bold text-gray-800">
-            {format(currentMonth, "yyyy年 MMMM", { locale: ja })}
+            あなたの{format(currentMonth, "M月", { locale: ja })}のシフト
           </h2>
           <button onClick={() => setCurrentMonth(addMonths(currentMonth, 1))} className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors">
             次月 &gt;
@@ -112,12 +122,6 @@ const EmployeeDashboard = () => {
               </div>
             );
           })}
-        </div>
-        
-        <div className="mt-8 text-center">
-            <a href="/employee/shift-request" className="text-blue-600 hover:text-blue-800 hover:underline">
-                希望シフトの提出・管理はこちら &rarr;
-            </a>
         </div>
       </main>
     </div>

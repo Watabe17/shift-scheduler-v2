@@ -60,9 +60,7 @@ export default function AdminShiftRequestPage() {
       }
       // Update the state locally for immediate feedback
       setRequests((prevRequests) =>
-        prevRequests.map((req) =>
-          req.id === id ? { ...req, status: status } : req
-        )
+        prevRequests.filter((req) => req.id !== id) // 承認されたシフト希望をリストから削除
       );
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : String(err));
@@ -116,13 +114,13 @@ export default function AdminShiftRequestPage() {
             </tr>
           </thead>
           <tbody>
-            {requests.map((req) => (
+            {requests.filter(req => req.status !== 'approved').map((req) => (
               <tr key={req.id}>
                 <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                  <p className="text-gray-900 whitespace-no-wrap">{req.user.name}</p>
+                  <p className="text-gray-900 whitespace-no-wrap">{req.user?.name || 'Unknown'}</p>
                 </td>
                 <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                  <p className="text-gray-900 whitespace-no-wrap">{req.position.name}</p>
+                  <p className="text-gray-900 whitespace-no-wrap">{req.position?.name || 'Unknown'}</p>
                 </td>
                 <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                   <p className="text-gray-900 whitespace-no-wrap">

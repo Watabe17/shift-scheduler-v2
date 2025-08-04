@@ -3,23 +3,27 @@ import { prisma } from '../../../../../lib/prisma';
 
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ employeeId: string }> }
+  context: { params: { userId: string } }
 ) {
-  const { employeeId } = await params;
+  const userId = context.params.userId;
+  console.log('API called with userId:', userId);
 
-  if (!employeeId) {
-    return NextResponse.json({ error: '従業員IDが必要です。' }, { status: 400 });
+  if (!userId) {
+    console.log('No userId provided');
+    return NextResponse.json({ error: 'ユーザーIDが必要です。' }, { status: 400 });
   }
 
   try {
+    console.log('Querying database for userId:', userId);
     const shiftRequests = await prisma.shiftRequest.findMany({
       where: {
-        employeeId: employeeId,
+        userId: userId,
       },
       orderBy: {
         date: 'asc',
       },
     });
+    console.log('Found shift requests:', shiftRequests.length);
     return NextResponse.json(shiftRequests);
   } catch (error) {
     console.error('Error fetching shift requests:', error);

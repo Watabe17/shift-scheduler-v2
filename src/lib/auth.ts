@@ -1,8 +1,10 @@
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
-import prisma from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 import { compare } from "bcryptjs";
+
+export const nextAuthSecret = process.env.NEXTAUTH_SECRET;
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -34,7 +36,7 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: nextAuthSecret,
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
@@ -50,20 +52,23 @@ export const authOptions: NextAuthOptions = {
       }
       return session;
     },
-    async redirect({ url, baseUrl }) {
-      // クエリパラメータからroleを取得
-      try {
-        const u = new URL(url, baseUrl);
-        const role = u.searchParams.get('role');
-        if (role === 'ADMIN') {
-          return baseUrl + '/admin/dashboard';
-        } else if (role === 'USER') {
-          return baseUrl + '/employee/dashboard';
-        }
-      } catch {}
-      // 取得できなければデフォルト
-      return baseUrl + '/employee/dashboard';
-    },
+    // redirectはNext.js Middlewareで処理するため、ここではデフォルトの挙動に任せる
+    // pagesオプションでログインページは指定済み
+    //
+    // async redirect({ url, baseUrl }) {
+    //   // クエリパラメータからroleを取得
+    //   try {
+    //     const u = new URL(url, baseUrl);
+    //     const role = u.searchParams.get('role');
+    //     if (role === 'ADMIN') {
+    //       return baseUrl + '/admin/dashboard';
+    //     } else if (role === 'USER') {
+    //       return baseUrl + '/employee/dashboard';
+    //     }
+    //   } catch {}
+    //   // 取得できなければデフォルト
+    //   return baseUrl + '/employee/dashboard';
+    // },
   },
   pages: {
     signIn: '/login',

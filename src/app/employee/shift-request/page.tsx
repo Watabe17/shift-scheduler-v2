@@ -14,6 +14,125 @@ type RequiredStaffWithPosition = RequiredStaff & { position: Position };
 
 const days = ["日", "月", "火", "水", "木", "金", "土"];
 
+const ShiftRequestModal = ({ 
+  isOpen, 
+  onClose, 
+  onSubmit, 
+  positions, 
+  selectedDate, 
+  requestToEdit 
+}: { 
+  isOpen: boolean; 
+  onClose: () => void; 
+  onSubmit: (data: { startTime: string; endTime: string; positionId: string }) => void; 
+  positions: Position[];
+  selectedDate: Date | null;
+  requestToEdit: ShiftRequestWithUserAndPosition | null;
+}) => {
+  const [startTime, setStartTime] = useState("09:00");
+  const [endTime, setEndTime] = useState("17:00");
+  const [positionId, setPositionId] = useState("");
+
+  useEffect(() => {
+    if (requestToEdit) {
+      setStartTime(requestToEdit.startTime);
+      setEndTime(requestToEdit.endTime);
+      setPositionId(requestToEdit.positionId || "");
+    } else {
+      setStartTime("09:00");
+      setEndTime("17:00");
+      setPositionId("");
+    }
+  }, [requestToEdit]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!positionId) {
+      toast.error("役職を選択してください。");
+      return;
+    }
+    onSubmit({ startTime, endTime, positionId });
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 w-full max-w-md">
+        <h3 className="text-lg font-semibold mb-4">
+          {requestToEdit ? "シフト申請を編集" : "シフト申請を提出"}
+        </h3>
+        {selectedDate && (
+          <p className="text-sm text-gray-600 mb-4">
+            日付: {format(selectedDate, "yyyy年M月d日", { locale: ja })}
+          </p>
+        )}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              役職
+            </label>
+            <select
+              value={positionId || ""}
+              onChange={(e) => setPositionId(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            >
+              <option value="">役職を選択してください ({positions.length}件)</option>
+              {positions.map((position) => (
+                <option key={position.id} value={position.id}>
+                  {position.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                開始時間
+              </label>
+              <input
+                type="time"
+                value={startTime}
+                onChange={(e) => setStartTime(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                終了時間
+              </label>
+              <input
+                type="time"
+                value={endTime}
+                onChange={(e) => setEndTime(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+          </div>
+          <div className="flex justify-end space-x-3 pt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
+            >
+              キャンセル
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            >
+              {requestToEdit ? "更新" : "提出"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
 const ShiftRequestPage = () => {
   const { data: session } = useSession();
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -36,8 +155,14 @@ const ShiftRequestPage = () => {
         fetch(`/api/shift-requests?month=${currentMonth.getMonth() + 1}&year=${currentMonth.getFullYear()}`),
       ]);
 
-      if (!requiredStaffResponse.ok || !positionsResponse.ok || !shiftRequestsResponse.ok) {
-        throw new Error("Failed to fetch data");
+      if (!requiredStaffResponse.ok) {
+        throw new Error(`Required Staff API failed: ${requiredStaffResponse.status}`);
+      }
+      if (!positionsResponse.ok) {
+        throw new Error(`Positions API failed: ${positionsResponse.status}`);
+      }
+      if (!shiftRequestsResponse.ok) {
+        throw new Error(`Shift Requests API failed: ${shiftRequestsResponse.status}`);
       }
       
       const requiredStaffData: RequiredStaffWithPosition[] = await requiredStaffResponse.json();
@@ -50,7 +175,7 @@ const ShiftRequestPage = () => {
 
     } catch (error: unknown) {
       console.error("Error fetching data:", error);
-      toast.error("データの取得に失敗しました。");
+      toast.error(`データの取得に失敗しました: ${error instanceof Error ? error.message : String(error)}`);
     }
   }, [currentMonth]);
 
@@ -192,12 +317,20 @@ const ShiftRequestPage = () => {
        )}
 
       <div className="flex justify-between items-center mb-6 bg-white p-4 rounded-lg shadow-sm border">
-        <button
-          onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-          className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
-        >
-          &lt; 前月
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => window.location.href = '/employee/dashboard'}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          >
+            HOME
+          </button>
+          <button
+            onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
+            className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
+          >
+            &lt; 前月
+          </button>
+        </div>
         <h2 className="text-2xl font-bold text-gray-800">
           {format(currentMonth, "yyyy年 MMMM", { locale: ja })}
         </h2>
@@ -227,67 +360,84 @@ const ShiftRequestPage = () => {
             return acc;
           }, {} as Record<string, number>);
 
-
           return (
-            <div
-              key={day.toString()}
-              className={`p-2 h-48 flex flex-col relative group transition-all duration-200 ease-in-out border-t
-                ${isCurrentMonth ? "bg-white" : "bg-gray-100 text-gray-400"}
-              `}
-              onClick={() => handleOpenModalForNew(day)}
-            >
-              <div className="flex justify-between items-start">
-                  <span
-                    className={`text-sm font-medium ${isToday ? "flex items-center justify-center w-6 h-6 bg-blue-600 text-white rounded-full" : "text-gray-900" } ${!isCurrentMonth && "text-gray-400"}`}
-                  >
-                    {format(day, "d")}
-                  </span>
-                  <div className="text-xs text-right">
-                     <span className={`font-bold ${requestsOnDay.length >= requiredCount && requiredCount > 0 ? "text-green-600" : "text-red-500"}`}>
-                       {requestsOnDay.length}
-                     </span>
-                     <span className="text-gray-500"> / {requiredCount}</span>
-                  </div>
-              </div>
-
-              {/* Position-specific required staff */}
-              <div className="flex flex-wrap gap-1 mt-1 text-[10px]">
-                {rulesForDay.map(rule => {
-                  const placed = requestsByPosition[rule.positionId] || 0;
-                  const required = rule.count;
-                  const isDeficient = placed < required;
-                  return (
-                    <div key={rule.id} className={`px-1.5 py-0.5 rounded-full text-white ${isDeficient ? 'bg-orange-500' : 'bg-green-500'}`}>
-                      {rule.position.name}: {placed}/{required}
+            <div key={day.toString()} className="aspect-[3/4]">
+              <div
+                className={`p-2 h-full flex flex-col relative group transition-all duration-200 ease-in-out border-t
+                  ${isCurrentMonth ? "bg-white" : "bg-gray-100 text-gray-400"}
+                `}
+                onClick={() => handleOpenModalForNew(day)}
+              >
+                <div className="flex justify-between items-start">
+                    <span
+                      className={`text-sm font-medium ${isToday ? "flex items-center justify-center w-6 h-6 bg-blue-600 text-white rounded-full" : "text-gray-900" } ${!isCurrentMonth && "text-gray-400"}`}
+                    >
+                      {format(day, "d")}
+                    </span>
+                    <div className="text-xs text-right">
+                       <span className={`font-bold ${requestsOnDay.length >= requiredCount && requiredCount > 0 ? "text-green-600" : "text-red-500"}`}>
+                         {requestsOnDay.length}
+                       </span>
+                       <span className="text-gray-500"> / {requiredCount}</span>
                     </div>
-                  )
-                })}
-              </div>
+                </div>
 
-              <div className="mt-1 pt-1 border-t border-gray-100 flex-grow overflow-y-auto text-xs space-y-1">
-                 {requestsOnDay.map(req => {
-                    const isOwner = req.user.id === session?.user?.id;
-                     return (
-                     <div 
-                        key={req.id} 
-                        onClick={(e) => {
-                            if (isOwner) {
-                                e.stopPropagation();
-                                handleOpenModalForEdit(req);
-                            }
-                        }}
-                        className={`rounded p-1 truncate ${isOwner ? 'bg-green-100 text-green-800 cursor-pointer hover:bg-green-200' : 'bg-blue-100 text-blue-800'}`} 
-                        title={`${req.user.name}: ${req.position.name} ${req.startTime}-${req.endTime}`}
-                     >
-                         <span className="font-semibold">{req.user.name}</span>
-                         <span className="text-gray-600"> ({req.position.name})</span>
-                     </div>
-                 )})}
+                {/* Position-specific required staff */}
+                <div className="flex flex-wrap gap-1 mt-1 text-[8px]">
+                  {rulesForDay.map(rule => {
+                    const placed = requestsByPosition[rule.positionId] || 0;
+                    const required = rule.count;
+                    const isDeficient = placed < required;
+                    return (
+                      <div key={rule.id} className={`px-1 py-0.5 rounded-full text-white ${isDeficient ? 'bg-orange-500' : 'bg-green-500'}`}>
+                        {rule.position?.name || 'Unknown'}: {placed}/{required}
+                      </div>
+                    )
+                  })}
+                </div>
+
+                <div className="mt-1 pt-1 border-t border-gray-100 flex-grow overflow-y-auto text-xs space-y-1">
+                   {requestsOnDay.map(req => {
+                      const currentUserId = session?.user?.id;
+                      const isOwner = currentUserId && req.user.id === currentUserId;
+                       return (
+                       <div 
+                          key={req.id} 
+                          onClick={(e) => {
+                              if (isOwner) {
+                                  e.stopPropagation();
+                                  handleOpenModalForEdit(req);
+                              }
+                          }}
+                          className={`rounded p-1 truncate ${isOwner ? 'bg-green-100 text-green-800 cursor-pointer hover:bg-green-200' : 'bg-blue-100 text-blue-800'}`} 
+                          title={`${req.user?.name || 'Unknown'}: ${req.position?.name || 'Unknown'} ${req.startTime}-${req.endTime}`}
+                       >
+                           <span className="font-semibold">{req.user?.name || 'Unknown'}</span>
+                           <span className="text-gray-600"> ({req.position?.name || 'Unknown'})</span>
+                       </div>
+                   )})}
+                </div>
               </div>
             </div>
           );
         })}
       </div>
+      
+      {/* シフト申請モーダル */}
+      <ShiftRequestModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onSubmit={(data) => {
+          if (requestToEdit) {
+            handleShiftRequestUpdate(requestToEdit.id, data);
+          } else {
+            handleShiftRequestCreate(data);
+          }
+        }}
+        positions={positions}
+        selectedDate={selectedDate}
+        requestToEdit={requestToEdit}
+      />
     </div>
   );
 };

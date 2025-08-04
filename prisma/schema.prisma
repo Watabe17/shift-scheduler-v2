@@ -14,16 +14,21 @@ datasource db {
 }
 
 model User {
-  id        String    @id @default(cuid())
-  name      String?
-  email     String?   @unique
-  password  String
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  password      String
   emailVerified DateTime?
-  image     String?
-  accounts  Account[]
-  sessions  Session[]
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
 
-  role      String   @default("USER")
+  role          String   @default("employee") // "admin" or "employee"
+
+  // Employee-related fields
+  positions     EmployeePosition[]
+  shiftRequests ShiftRequest[]
+  shifts        Shift[]
 
   @@map("users")
 }
@@ -67,58 +72,37 @@ model VerificationToken {
   @@map("verification_tokens")
 }
 
-// ここから下に、PositionやShiftRequestなど、
-// あなたのアプリケーションで必要なモデルを追加していきます。
-
 model Position {
   id            String         @id @default(cuid())
   name          String         @unique
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   
-  // リレーション
   shiftRequests ShiftRequest[]
   shifts        Shift[]
   requiredStaffs RequiredStaff[]
-  employees     EmployeePosition[]
+  users         EmployeePosition[]
 
   @@map("positions")
 }
 
-model Employee {
-  id        String    @id @default(cuid())
-  name      String
-  email     String    @unique
-  password  String
-  role      String    @default("employee")
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  
-  // リレーション
-  positions     EmployeePosition[]
-  shiftRequests ShiftRequest[]
-  shifts        Shift[]
-
-  @@map("employees")
-}
-
 model EmployeePosition {
   id         String   @id @default(cuid())
-  employeeId String
+  userId     String
   positionId String
   createdAt  DateTime @default(now())
   
-  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   position   Position @relation(fields: [positionId], references: [id], onDelete: Cascade)
 
-  @@unique([employeeId, positionId])
+  @@unique([userId, positionId])
   @@map("employee_positions")
 }
 
 model ShiftRequest {
   id         String   @id @default(cuid())
-  employeeId String
-  positionId String? // オプショナルに変更
+  userId     String
+  positionId String?
   date       DateTime @db.Date
   startTime  String
   endTime    String
@@ -126,15 +110,18 @@ model ShiftRequest {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   
-  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   position   Position? @relation(fields: [positionId], references: [id])
+
+  shiftId    String?  @unique
+  shift      Shift?   @relation(fields: [shiftId], references: [id])
 
   @@map("shift_requests")
 }
 
 model Shift {
   id         String   @id @default(cuid())
-  employeeId String
+  userId     String
   positionId String
   date       String
   startTime  String
@@ -143,8 +130,10 @@ model Shift {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   
-  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   position   Position @relation(fields: [positionId], references: [id], onDelete: Cascade)
+
+  request    ShiftRequest?
 
   @@map("shifts")
 }

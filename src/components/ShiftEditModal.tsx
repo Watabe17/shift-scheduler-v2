@@ -41,8 +41,8 @@ export default function ShiftEditModal({ isOpen, onClose, onSave, onUpdate, shif
         date: dateString,
         startTime: shift.startTime,
         endTime: shift.endTime,
-        positionId: shift.positionId,
-        employeeId: shift.employeeId,
+        positionId: shift.positionId || "",
+        employeeId: shift.employeeId || "",
       });
     }
   }, [shift, isCreating]);
@@ -80,7 +80,7 @@ export default function ShiftEditModal({ isOpen, onClose, onSave, onUpdate, shif
               <select
                 id="employeeId"
                 name="employeeId"
-                value={formData.employeeId}
+                value={formData.employeeId || ""}
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                 required
@@ -137,7 +137,7 @@ export default function ShiftEditModal({ isOpen, onClose, onSave, onUpdate, shif
             <select
               id="positionId"
               name="positionId"
-              value={formData.positionId}
+              value={formData.positionId || ""}
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
               required

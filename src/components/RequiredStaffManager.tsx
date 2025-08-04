@@ -120,7 +120,7 @@ export default function RequiredStaffManager({ position, onUpdate }: RequiredSta
 
       <div className="space-y-2">
         <h4 className="font-semibold text-md">既存のルール</h4>
-        {position.requiredStaffs.length > 0 ? (
+        {position.requiredStaffs && position.requiredStaffs.length > 0 ? (
           <ul className="divide-y divide-gray-200">
             {position.requiredStaffs.map(rule => (
               <li key={rule.id} className="p-2 flex justify-between items-center hover:bg-gray-50 rounded-md">

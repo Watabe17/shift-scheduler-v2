@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     }
 
     // メールアドレスの重複チェック
-    const existingUser = await prisma.employee.findUnique({
+    const existingUser = await prisma.user.findUnique({
       where: { email },
     });
 
@@ -29,21 +29,21 @@ export async function POST(request: NextRequest) {
     // パスワードをハッシュ化
     const hashedPassword = await hash(password, 10);
 
-    // 従業員アカウントを作成
-    const newEmployee = await prisma.employee.create({
+    // ユーザーアカウントを作成
+    const newUser = await prisma.user.create({
       data: {
         name,
         email,
         password: hashedPassword,
-        role: 'USER', // 従業員は'USER'ロール
+        // roleはデフォルトで "employee" になります
       },
     });
 
     // パスワードを除いて返す
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password: _, ...employeeWithoutPassword } = newEmployee;
+    const { password: _, ...userWithoutPassword } = newUser;
 
-    return NextResponse.json(employeeWithoutPassword, { status: 201 });
+    return NextResponse.json(userWithoutPassword, { status: 201 });
   } catch (error) {
     console.error('従業員作成エラー:', error);
     return NextResponse.json(
@@ -56,9 +56,9 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   try {
     // 従業員一覧を取得（管理者以外）
-    const employees = await prisma.employee.findMany({
+    const users = await prisma.user.findMany({
       where: {
-        role: 'USER',
+        role: 'employee',
       },
       select: {
         id: true,
@@ -71,7 +71,7 @@ export async function GET() {
       },
     });
 
-    return NextResponse.json(employees);
+    return NextResponse.json(users);
   } catch (error) {
     console.error('従業員一覧取得エラー:', error);
     return NextResponse.json(

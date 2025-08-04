@@ -139,6 +139,25 @@ export default function EmployeeShiftsPage() {
 
   return (
     <div className="container mx-auto p-4 sm:p-6 lg:p-8 bg-gray-50 min-h-screen">
+      {/* シフト申請へのリンク */}
+      <div className="mb-6 bg-gradient-to-r from-green-500 to-green-600 rounded-lg p-6 text-white shadow-lg">
+        <div className="flex flex-col md:flex-row items-center justify-between">
+          <div className="mb-4 md:mb-0">
+            <h2 className="text-xl md:text-2xl font-bold mb-2">シフト申請</h2>
+            <p className="text-green-100">月間カレンダーでシフト希望を提出できます</p>
+          </div>
+          <a
+            href="/employee/shift-request"
+            className="inline-flex items-center px-6 py-3 bg-white text-green-600 font-semibold rounded-lg shadow-md hover:bg-green-50 transition-colors duration-200"
+          >
+            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            シフト申請ページへ
+          </a>
+        </div>
+      </div>
+
        <header className="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-4">
         <div>
             <h1 className="text-3xl font-bold text-gray-800">確定シフト</h1>
@@ -207,7 +226,7 @@ export default function EmployeeShiftsPage() {
                                 <div className="mt-auto pt-2 text-[10px] space-y-1">
                                     {rulesForDay.map(rule => (
                                         <div key={rule.id} className="px-1.5 py-0.5 rounded-full text-white bg-gray-400">
-                                            {rule.position.name}: {rule.count}人
+                                            {rule.position?.name || 'Unknown'}: {rule.count}人
                                         </div>
                                     ))}
                                 </div>

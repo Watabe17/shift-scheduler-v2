@@ -43,6 +43,11 @@ const DraggableShiftRequest = ({ request }: { request: ShiftRequestWithDetails }
     }),
   });
 
+  // userまたはpositionがnullの場合は表示しない
+  if (!request.user || !request.position) {
+    return null;
+  }
+
   return (
     <div
       ref={drag as unknown as React.LegacyRef<HTMLDivElement>}
@@ -73,6 +78,11 @@ const PositionLane = ({ position, shifts, onDrop, onShiftClick }: { position: Po
             <p className="text-xs font-semibold text-gray-500 border-b">{position.name}</p>
             <div className="mt-1 space-y-1">
                 {shifts.map(shift => {
+                  // userがnullの場合は表示しない
+                  if (!shift.user) {
+                    return null;
+                  }
+                  
                   const type = Object.keys(shiftTypes).find(key => shiftTypes[key].name === shift.position.name); // Simplify this mapping based on your actual position names
                   const shiftClass = type ? shiftTypes[type].class : 'shift-morning'; // Default or handle unmapped positions
                   return (
@@ -127,7 +137,7 @@ const SimpleCalendar = ({ currentMonth, onMonthChange, shifts, requiredStaff, po
     return (
       <div
         ref={drop as unknown as React.LegacyRef<HTMLDivElement>}
-        className={`border p-2 min-h-[160px] flex flex-col ${
+        className={`border p-2 h-full flex flex-col ${
           isCurrentMonth ? 'bg-white' : 'bg-gray-100'
         } ${isOver ? 'bg-blue-50' : ''}`} // ドラッグ中に日付全体を薄くハイライト
       >
@@ -137,7 +147,7 @@ const SimpleCalendar = ({ currentMonth, onMonthChange, shifts, requiredStaff, po
         </span>
         </div>
         
-        <div className="flex-grow space-y-2 mt-1">
+        <div className="flex-grow space-y-1 mt-1 overflow-hidden">
             {/* Staffing Summary */}
             <div className="flex flex-wrap gap-1">
                 {rulesForDay.map(rule => {
@@ -145,15 +155,15 @@ const SimpleCalendar = ({ currentMonth, onMonthChange, shifts, requiredStaff, po
                     const required = rule.count;
                     const isDeficient = placed < required;
                     return (
-                    <div key={rule.id} className={`px-1.5 py-0.5 rounded-full text-white text-[10px] ${isDeficient ? 'bg-red-500' : 'bg-green-500'}`}>
-                        {rule.position.name}: {placed}/{required}
+                    <div key={rule.id} className={`px-1 py-0.5 rounded-full text-white text-[8px] ${isDeficient ? 'bg-red-500' : 'bg-green-500'}`}>
+                        {rule.position?.name || 'Unknown'}: {placed}/{required}
                     </div>
                     )
                 })}
             </div>
             
             {/* Shift Lanes */}
-            <div className="space-y-2 mt-2">
+            <div className="space-y-1 mt-1 overflow-y-auto">
             {positions.map(position => (
                 <PositionLane 
                     key={position.id}
@@ -171,33 +181,22 @@ const SimpleCalendar = ({ currentMonth, onMonthChange, shifts, requiredStaff, po
   
   return (
     <div className="h-full flex flex-col">
-      <div className="flex justify-between items-center p-2 gap-4">
-        <div className="flex items-center gap-2">
-            <button onClick={() => onMonthChange(subMonths(currentMonth, 1))} className="px-4 py-2 bg-gray-200 rounded">前月</button>
-            <h2 className="text-xl font-bold whitespace-nowrap">{format(currentMonth, 'yyyy年 M月', { locale: ja })}</h2>
-            <button onClick={() => onMonthChange(addMonths(currentMonth, 1))} className="px-4 py-2 bg-gray-200 rounded">次月</button>
-        </div>
-        <div className="flex items-center gap-2">
-            <button
-                onClick={onDownloadPdf}
-                className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700"
-            >
-                PDFダウンロード
-            </button>
-            <button 
-                onClick={onFinalize}
-                disabled={isFinalizing}
-                className="px-4 py-2 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 disabled:bg-green-300 disabled:cursor-not-allowed"
-            >
-                {isFinalizing ? '処理中...' : `${format(currentMonth, 'M月')}のシフトを確定`}
-            </button>
+              <div className="flex justify-between items-center p-2 gap-4">
+          <div className="flex items-center gap-2">
+              <button onClick={() => onMonthChange(subMonths(currentMonth, 1))} className="px-4 py-2 bg-gray-200 rounded">前月</button>
+              <h2 className="text-xl font-bold whitespace-nowrap">{format(currentMonth, 'yyyy年 M月', { locale: ja })}</h2>
+              <button onClick={() => onMonthChange(addMonths(currentMonth, 1))} className="px-4 py-2 bg-gray-200 rounded">次月</button>
           </div>
         </div>
       <div className="grid grid-cols-7 flex-grow">
         {['日', '月', '火', '水', '木', '金', '土'].map(day => (
           <div key={day} className="text-center font-bold text-sm py-2 border-b">{day}</div>
         ))}
-        {days.map(day => <DayCell key={day.toString()} day={day} />)}
+        {days.map(day => (
+          <div key={day.toString()} className="aspect-[3/4]">
+            <DayCell day={day} />
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -235,8 +234,9 @@ export default function ShiftCreationPage() {
 
   const fetchAllData = useCallback(async (year: number, month: number) => {
     try {
+      console.log("fetchAllData called with:", { year, month });
       const [requestsRes, shiftsRes, requiredStaffRes, positionsRes, employeesRes] = await Promise.all([
-        fetch("/api/admin/shift-requests?status=approved"),
+        fetch("/api/admin/shift-requests"),
         fetch(`/api/admin/shifts?year=${year}&month=${month}`),
         fetch("/api/admin/required-staff"),
         fetch("/api/admin/positions"),
@@ -252,7 +252,15 @@ export default function ShiftCreationPage() {
       const positionsData: Position[] = await positionsRes.json();
       const employeesData: User[] = await employeesRes.json();
 
-      setRequests(requestsData.filter((r) => !r.shift));
+      console.log("Fetched data:", {
+        requests: requestsData.length,
+        shifts: shiftsData.length,
+        requiredStaff: requiredStaffData.length,
+        positions: positionsData.length,
+        employees: employeesData.length
+      });
+
+      setRequests(requestsData);
       setShifts(shiftsData);
       setRequiredStaff(requiredStaffData);
       setPositions(positionsData);
@@ -272,19 +280,24 @@ export default function ShiftCreationPage() {
 
   const handleDropOnCalendar = useCallback(async (request: ShiftRequestWithDetails, date: Date, positionId: string) => {
     try {
+      console.log("handleDropOnCalendar called with:", { request, date, positionId });
       const formattedDate = format(date, "yyyy-MM-dd'T'00:00:00.000'Z'");
+      
+      const requestBody = {
+        userId: request.user.id,
+        positionId: positionId, // ドロップされたレーンのポジションIDを使用
+        date: formattedDate,
+        startTime: request.startTime,
+        endTime: request.endTime,
+        shiftRequestId: request.id,
+      };
+      
+      console.log("Sending request body:", requestBody);
 
       const res = await fetch("/api/admin/shifts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          employeeId: request.user.id,
-          positionId: positionId, // ドロップされたレーンのポジションIDを使用
-          date: formattedDate,
-          startTime: request.startTime,
-          endTime: request.endTime,
-          shiftRequestId: request.id,
-        }),
+        body: JSON.stringify(requestBody),
       });
       if (!res.ok) {
         const errorData = await res.json();
@@ -319,7 +332,7 @@ export default function ShiftCreationPage() {
       startTime: '09:00',
       endTime: '17:00',
       status: 'DRAFT',
-      employeeId: '',
+      userId: '',
       positionId: '',
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -360,19 +373,12 @@ export default function ShiftCreationPage() {
   };
 
   const handleDownloadPdf = async () => {
-    if (!font) {
-        toast.error("フォントが読み込まれていません。");
-        return;
-    }
-
     const doc = new jsPDF();
-    doc.addFont('NotoSansJP-Regular.ttf', 'NotoSansJP', 'normal');
-    doc.setFont('NotoSansJP');
 
     const shiftsForPdf = shifts.map(shift => [
         format(new Date(shift.date), 'yyyy/MM/dd', { locale: ja }),
-        shift.user.name || '',
-        shift.position.name || '',
+        shift.user?.name || '',
+        shift.position?.name || '',
         `${shift.startTime.slice(0,5)} - ${shift.endTime.slice(0,5)}`,
         shift.status,
     ]);
@@ -381,8 +387,6 @@ export default function ShiftCreationPage() {
         head: [['日付', '従業員', '役職', '時間', 'ステータス']],
         body: shiftsForPdf,
         startY: 20,
-        headStyles: { font: 'NotoSansJP' },
-        bodyStyles: { font: 'NotoSansJP' },
     });
 
     doc.save(`shifts_${format(currentMonth, 'yyyyMM')}.pdf`);

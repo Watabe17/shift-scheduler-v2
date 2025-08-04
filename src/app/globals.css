@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;600&display=swap');
 @import "tailwindcss";
 
 :root {
@@ -20,7 +21,11 @@
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Noto Serif JP', "Yu Mincho", "YuMincho", "Hiragino Mincho ProN", "MS PMincho", serif;
+  background-color: #f8f9fb;
+  font-weight: 400;
+  letter-spacing: 0;
+  margin: 0;
+  padding: 20px;
+  line-height: 1.5;
 }
