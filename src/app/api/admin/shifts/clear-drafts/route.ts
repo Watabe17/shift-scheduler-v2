@@ -1,24 +1,17 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-// POST: ドラフトシフトをクリアする
-export async function POST(request: Request) {
+export async function DELETE() {
   try {
-    // すべてのドラフトシフトを削除
-    const deletedShifts = await prisma.shift.deleteMany({
+    await prisma.shift.deleteMany({
       where: {
-        status: 'DRAFT',
+        status: 'draft',
       },
     });
 
-    console.log(`Cleared ${deletedShifts.count} draft shifts`);
-
-    return NextResponse.json({ 
-      message: `${deletedShifts.count}件のドラフトシフトを削除しました。`,
-      count: deletedShifts.count 
-    }, { status: 200 });
+    return NextResponse.json({ message: '下書きシフトが削除されました。' });
   } catch (error) {
     console.error('Error clearing draft shifts:', error);
-    return NextResponse.json({ error: 'ドラフトシフトの削除中にエラーが発生しました。' }, { status: 500 });
+    return NextResponse.json({ error: '下書きシフトの削除中にエラーが発生しました。' }, { status: 500 });
   }
 } 

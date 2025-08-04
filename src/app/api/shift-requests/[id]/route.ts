@@ -1,36 +1,56 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
 
-export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } }
+// GET: 特定のシフト申請を取得
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: '認証が必要です。' }, { status: 401 });
-    }
-
-    const body = await request.json();
-    const { startTime, endTime, positionId } = body;
-
-    // 自分のシフト申請のみ更新可能
+    const { id } = await params;
+    
     const shiftRequest = await prisma.shiftRequest.findUnique({
-      where: { id: params.id },
+      where: { id },
+      include: {
+        user: true,
+        position: true,
+      },
     });
 
-    if (!shiftRequest || shiftRequest.userId !== session.user.id) {
-      return NextResponse.json({ error: '権限がありません。' }, { status: 403 });
+    if (!shiftRequest) {
+      return NextResponse.json({ error: 'シフト申請が見つかりません。' }, { status: 404 });
     }
 
-    const updatedShiftRequest = await prisma.shiftRequest.update({
-      where: { id: params.id },
+    return NextResponse.json(shiftRequest);
+  } catch (error) {
+    console.error('Error fetching shift request:', error);
+    return NextResponse.json({ error: 'シフト申請の取得中にエラーが発生しました。' }, { status: 500 });
+  }
+}
+
+// PUT: シフト申請を更新
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const body = await request.json();
+    const { startDate, endDate, startTime, endTime, positionId, reason } = body;
+
+    if (!startDate || !endDate || !startTime || !endTime || !positionId) {
+      return NextResponse.json({ error: '必要なフィールドが不足しています。' }, { status: 400 });
+    }
+
+    const updatedRequest = await prisma.shiftRequest.update({
+      where: { id },
       data: {
+        startDate: new Date(startDate),
+        endDate: new Date(endDate),
         startTime,
         endTime,
         positionId,
+        reason,
       },
       include: {
         user: true,
@@ -38,37 +58,26 @@ export async function PUT(
       },
     });
 
-    return NextResponse.json(updatedShiftRequest);
+    return NextResponse.json(updatedRequest);
   } catch (error) {
     console.error('Error updating shift request:', error);
     return NextResponse.json({ error: 'シフト申請の更新中にエラーが発生しました。' }, { status: 500 });
   }
 }
 
+// DELETE: シフト申請を削除
 export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: '認証が必要です。' }, { status: 401 });
-    }
-
-    // 自分のシフト申請のみ削除可能
-    const shiftRequest = await prisma.shiftRequest.findUnique({
-      where: { id: params.id },
-    });
-
-    if (!shiftRequest || shiftRequest.userId !== session.user.id) {
-      return NextResponse.json({ error: '権限がありません。' }, { status: 403 });
-    }
-
+    const { id } = await params;
+    
     await prisma.shiftRequest.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
-    return new NextResponse(null, { status: 204 });
+    return NextResponse.json({ message: 'シフト申請が削除されました。' });
   } catch (error) {
     console.error('Error deleting shift request:', error);
     return NextResponse.json({ error: 'シフト申請の削除中にエラーが発生しました。' }, { status: 500 });

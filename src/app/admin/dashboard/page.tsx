@@ -10,10 +10,6 @@ const CalendarDaysIcon = ({ className }: { className?: string }) => (
   <span className={className}>📅</span>
 );
 
-const ClockIcon = ({ className }: { className?: string }) => (
-  <span className={className}>🕐</span>
-);
-
 const UserIcon = ({ className }: { className?: string }) => (
   <span className={className}>👤</span>
 );
