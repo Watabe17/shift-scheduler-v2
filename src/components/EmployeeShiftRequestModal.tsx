@@ -37,7 +37,7 @@ export default function EmployeeShiftRequestModal({
         if (isEditMode && requestToEdit) {
             setStartTime(requestToEdit.startTime);
             setEndTime(requestToEdit.endTime);
-            setPositionId(requestToEdit.positionId);
+            setPositionId(requestToEdit.positionId || '');
         } else {
             // Reset for new request
             setStartTime("09:00");
