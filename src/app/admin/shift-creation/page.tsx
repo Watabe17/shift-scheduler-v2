@@ -8,8 +8,7 @@ import NotificationBell from "@/components/NotificationBell";
 
 interface ShiftRequest {
   id: string;
-  startDate: string;
-  endDate: string;
+  date: string;
   startTime: string;
   endTime: string;
   status: string;
@@ -131,7 +130,7 @@ export default function ShiftCreationPage() {
                     従業員
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    期間
+                    日付
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     時間
@@ -154,7 +153,7 @@ export default function ShiftCreationPage() {
                       {request.user.name}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {new Date(request.startDate).toLocaleDateString('ja-JP')} - {new Date(request.endDate).toLocaleDateString('ja-JP')}
+                      {new Date(request.date).toLocaleDateString('ja-JP')}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {request.startTime} - {request.endTime}

@@ -36,21 +36,19 @@ export async function PUT(
   try {
     const { id } = await params;
     const body = await request.json();
-    const { startDate, endDate, startTime, endTime, positionId, reason } = body;
+    const { date, startTime, endTime, positionId, reason } = body;
 
-    if (!startDate || !endDate || !startTime || !endTime || !positionId) {
+    if (!date || !startTime || !endTime || !positionId) {
       return NextResponse.json({ error: '必要なフィールドが不足しています。' }, { status: 400 });
     }
 
     const updatedRequest = await prisma.shiftRequest.update({
       where: { id },
       data: {
-        startDate: new Date(startDate),
-        endDate: new Date(endDate),
+        date: new Date(date),
         startTime,
         endTime,
         positionId,
-        reason,
       },
       include: {
         user: true,

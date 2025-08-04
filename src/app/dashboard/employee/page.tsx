@@ -12,22 +12,13 @@ const CalendarDaysIcon = ({ className }: { className?: string }) => (
   <span className={className}>📅</span>
 );
 
-const ClockIcon = ({ className }: { className?: string }) => (
-  <span className={className}>🕐</span>
-);
-
-const UserIcon = ({ className }: { className?: string }) => (
-  <span className={className}>👤</span>
-);
-
 const ClipboardDocumentCheckIcon = ({ className }: { className?: string }) => (
   <span className={className}>✅</span>
 );
 
 interface ShiftRequest {
   id: string;
-  startDate: string;
-  endDate: string;
+  date: string;
   startTime: string;
   endTime: string;
   status: string;
@@ -119,7 +110,7 @@ export default function EmployeeDashboard() {
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      期間
+                      日付
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       時間
@@ -136,7 +127,7 @@ export default function EmployeeDashboard() {
                   {shiftRequests.map((request) => (
                     <tr key={request.id}>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {new Date(request.startDate).toLocaleDateString('ja-JP')} - {new Date(request.endDate).toLocaleDateString('ja-JP')}
+                        {new Date(request.date).toLocaleDateString('ja-JP')}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {request.startTime} - {request.endTime}
