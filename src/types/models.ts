@@ -1,12 +1,12 @@
 // src/types/models.ts
-import { User as PrismaUser, Position as PrismaPosition, RequiredStaff as PrismaRequiredStaff, ShiftRequest as PrismaShiftRequest, Shift as PrismaShift, Employee as PrismaEmployee } from '@prisma/client';
+import { User as PrismaUser, Position as PrismaPosition, RequiredStaff as PrismaRequiredStaff, ShiftRequest as PrismaShiftRequest, Shift as PrismaShift } from '@prisma/client';
 
 export type User = PrismaUser;
 export type Position = PrismaPosition;
 export type RequiredStaff = PrismaRequiredStaff;
 export type ShiftRequest = PrismaShiftRequest;
 export type Shift = PrismaShift;
-export type Employee = PrismaEmployee;
+export type Employee = PrismaUser; // EmployeeはUserと同じ型として扱う
 
 
 
