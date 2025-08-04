@@ -42,7 +42,7 @@ export default function ShiftEditModal({ isOpen, onClose, onSave, onUpdate, shif
         startTime: shift.startTime,
         endTime: shift.endTime,
         positionId: shift.positionId || "",
-        employeeId: shift.employeeId || "",
+        employeeId: shift.userId || "",
       });
     }
   }, [shift, isCreating]);
