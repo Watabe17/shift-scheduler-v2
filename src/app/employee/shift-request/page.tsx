@@ -356,7 +356,9 @@ const ShiftRequestPage = () => {
           const isToday = isSameDay(day, new Date());
           const rulesForDay = requiredStaff.filter(r => r.dayOfWeek === getDay(day));
           const requestsByPosition = requestsOnDay.reduce((acc, req) => {
-            acc[req.positionId] = (acc[req.positionId] || 0) + 1;
+            if (req.positionId) {
+              acc[req.positionId] = (acc[req.positionId] || 0) + 1;
+            }
             return acc;
           }, {} as Record<string, number>);
 

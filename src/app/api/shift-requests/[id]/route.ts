@@ -36,7 +36,7 @@ export async function PUT(
   try {
     const { id } = await params;
     const body = await request.json();
-    const { date, startTime, endTime, positionId, reason } = body;
+    const { date, startTime, endTime, positionId } = body;
 
     if (!date || !startTime || !endTime || !positionId) {
       return NextResponse.json({ error: '必要なフィールドが不足しています。' }, { status: 400 });
