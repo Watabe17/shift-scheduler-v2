@@ -60,18 +60,29 @@ export async function GET() {
       where: {
         role: 'employee',
       },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
+      include: {
+        positions: {
+          include: {
+            position: true,
+          },
+        },
       },
       orderBy: {
         id: 'desc',
       },
     });
 
-    return NextResponse.json(users);
+    // データを整形して返す
+    const employeesWithPositions = users.map(user => ({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      createdAt: user.createdAt,
+      positions: user.positions.map(ep => ep.position),
+    }));
+
+    return NextResponse.json(employeesWithPositions);
   } catch (error) {
     console.error('従業員一覧取得エラー:', error);
     return NextResponse.json(

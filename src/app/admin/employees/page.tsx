@@ -6,7 +6,7 @@ import { format } from 'date-fns';
 import { ja } from 'date-fns/locale';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { User, Position, EmployeeWithPositions as Employee } from "@/types/models";
+import { User, Position, EmployeeWithPositions } from "@/types/models";
 
 // For simplicity, modals are in the same file. In a real app, extract them.
 
@@ -14,7 +14,7 @@ import { User, Position, EmployeeWithPositions as Employee } from "@/types/model
 interface AddEmployeeModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onAdd: (data: Omit<User, 'id' | 'role' | 'createdAt' | 'emailVerified'> & { password: string, image?: string | null, positionIds: string[] }) => Promise<void>;
+    onAdd: (data: Omit<User, 'id' | 'role' | 'createdAt' | 'emailVerified' | 'updatedAt'> & { password: string, image?: string | null, positionIds: string[] }) => Promise<void>;
     positions: Position[];
 }
 
@@ -100,7 +100,7 @@ interface EditPositionsModalProps {
     isOpen: boolean;
     onClose: () => void;
     onUpdate: (employeeId: string, positionIds: string[]) => Promise<void>;
-    employee: Employee | null; // Employee 型を使用
+    employee: EmployeeWithPositions | null; // Employee 型を使用
     allPositions: Position[];
 }
 
@@ -159,12 +159,12 @@ const EditPositionsModal = ({ isOpen, onClose, onUpdate, employee, allPositions 
 
 
 export default function EmployeesPage() {
-    const [employees, setEmployees] = useState<Employee[]>([]); // Employee 型を使用
+    const [employees, setEmployees] = useState<EmployeeWithPositions[]>([]); // Employee 型を使用
     const [allPositions, setAllPositions] = useState<Position[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null); // Employee 型を使用
+    const [selectedEmployee, setSelectedEmployee] = useState<EmployeeWithPositions | null>(null); // Employee 型を使用
 
     const fetchData = useCallback(async () => {
         setIsLoading(true);
@@ -189,7 +189,7 @@ export default function EmployeesPage() {
         fetchData();
     }, [fetchData]);
 
-    const handleAddEmployee = async (data: Omit<User, 'id' | 'role' | 'createdAt'| 'emailVerified'> & { password: string, image?: string | null, positionIds: string[] }) => {
+    const handleAddEmployee = async (data: Omit<User, 'id' | 'role' | 'createdAt'| 'emailVerified' | 'updatedAt'> & { password: string, image?: string | null, positionIds: string[] }) => {
         try {
             const res = await fetch('/api/admin/employees', {
                 method: 'POST',
@@ -225,7 +225,7 @@ export default function EmployeesPage() {
         }
     };
 
-    const handleOpenEditModal = (employee: Employee) => { // Employee 型を使用
+    const handleOpenEditModal = (employee: EmployeeWithPositions) => { // Employee 型を使用
         setSelectedEmployee(employee);
         setIsEditModalOpen(true);
     };
