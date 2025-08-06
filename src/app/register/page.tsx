@@ -108,6 +108,14 @@ export default function RegisterPage() {
             ログイン
           </Link>
         </p>
+        <div className="mt-4 pt-4 border-t border-gray-200">
+          <p className="text-sm text-center text-gray-600">
+            管理者アカウントを作成しますか？{' '}
+            <Link href="/admin/register" className="font-medium text-indigo-600 hover:text-indigo-500">
+              管理者登録
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );

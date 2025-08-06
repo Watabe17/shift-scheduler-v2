@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 
 // 絵文字アイコンコンポーネント
 const CalendarDaysIcon = ({ className }: { className?: string }) => (
@@ -299,6 +300,12 @@ export default function ShiftManagementPage() {
               <UserIcon className="w-4 h-4" />
               {session?.user?.name || 'ユーザー'}
             </div>
+            <Link 
+              href="/logout" 
+              className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+            >
+              ログアウト
+            </Link>
           </div>
         </div>
 

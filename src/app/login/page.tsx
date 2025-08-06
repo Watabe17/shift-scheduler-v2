@@ -1,10 +1,11 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { signIn, getSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 
 export default function LoginPage() {
   const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
@@ -17,14 +18,15 @@ export default function LoginPage() {
   const { data: session } = useSession();
 
   // 既にログインしている場合はリダイレクト
-  if (session) {
-    if ((session.user as any)?.role === "ADMIN") {
-      router.push("/admin/dashboard");
-    } else {
-      router.push("/dashboard/employee");
+  useEffect(() => {
+    if (session) {
+      if ((session.user as any)?.role === "ADMIN") {
+        router.push("/admin/dashboard");
+      } else {
+        router.push("/dashboard/employee");
+      }
     }
-    return null;
-  }
+  }, [session, router]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -256,6 +258,15 @@ export default function LoginPage() {
               >
                 {isLoading ? "登録中..." : "登録する"}
               </button>
+            </div>
+            
+            <div className="text-center">
+              <p className="text-sm text-gray-600">
+                管理者アカウントを作成しますか？{' '}
+                <Link href="/admin/register" className="font-medium text-indigo-600 hover:text-indigo-500">
+                  管理者登録
+                </Link>
+              </p>
             </div>
           </form>
         )}
