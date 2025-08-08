@@ -16,6 +16,9 @@ export async function POST(request: NextRequest) {
 
     // 管理者コードの検証（環境変数から取得）
     const validAdminCode = process.env.ADMIN_REGISTRATION_CODE;
+    console.log('環境変数の管理者コード:', validAdminCode);
+    console.log('送信された管理者コード:', adminCode);
+    
     if (!validAdminCode || adminCode !== validAdminCode) {
       return NextResponse.json(
         { error: '管理者コードが正しくありません' },

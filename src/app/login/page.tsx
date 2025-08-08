@@ -8,12 +8,13 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 
 export default function LoginPage() {
-  const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
+  const [email, setEmail] = useState("test1@example.com");
+  const [password, setPassword] = useState("test1123");
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const router = useRouter();
   const { data: session } = useSession();
 
@@ -28,10 +29,51 @@ export default function LoginPage() {
     }
   }, [session, router]);
 
+  const showMessage = (message: string, type: 'error' | 'success') => {
+    if (type === 'error') {
+      setError(message);
+      setSuccess("");
+    } else {
+      setSuccess(message);
+      setError("");
+    }
+    
+    // 5秒後に自動で非表示
+    setTimeout(() => {
+      setError("");
+      setSuccess("");
+    }, 5000);
+  };
+
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (isLoading) return;
+    
+    // バリデーション
+    if (!email || !password) {
+      showMessage('メールアドレスとパスワードを入力してください', 'error');
+      return;
+    }
+    
+    if (!validateEmail(email)) {
+      showMessage('有効なメールアドレスを入力してください', 'error');
+      return;
+    }
+    
+    if (password.length < 6) {
+      showMessage('パスワードは6文字以上である必要があります', 'error');
+      return;
+    }
+    
     setIsLoading(true);
     setError("");
+    setSuccess("");
 
     try {
       const result = await signIn("credentials", {
@@ -41,236 +83,187 @@ export default function LoginPage() {
       });
 
       if (result?.ok) {
-        const session = await getSession();
-        if ((session?.user as any)?.role === "ADMIN") {
-          router.push("/admin/dashboard");
-        } else {
-          router.push("/dashboard/employee");
-        }
+        showMessage('ログインしました！リダイレクトしています...', 'success');
+        
+        // 2秒後にリダイレクト
+        setTimeout(async () => {
+          const session = await getSession();
+          if ((session?.user as any)?.role === "ADMIN") {
+            router.push("/admin/dashboard");
+          } else {
+            router.push("/dashboard/employee");
+          }
+        }, 2000);
       } else {
-        setError("ログインに失敗しました。メールアドレスとパスワードを確認してください。");
+        showMessage('メールアドレスまたはパスワードが正しくありません', 'error');
       }
     } catch (error) {
       console.error("Login error:", error);
-      setError("ログイン中にエラーが発生しました。");
+      showMessage('ログイン中にエラーが発生しました', 'error');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError("");
-
-    if (!name || !email || !password) {
-      setError("すべてのフィールドを入力してください。");
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      const response = await fetch('/api/admin/employees', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name, email, password }),
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        setError(data.error || '登録に失敗しました。');
-      } else {
-        alert('登録が成功しました。ログインしてください。');
-        setActiveTab('login');
-        setName("");
-        setEmail("");
-        setPassword("");
-      }
-    } catch (error) {
-      console.error('登録エラー:', error);
-      setError('登録中にエラーが発生しました。');
-    } finally {
-      setIsLoading(false);
-    }
+  const togglePassword = () => {
+    setShowPassword(!showPassword);
   };
 
-  const handleTabChange = (tab: 'login' | 'register') => {
-    setActiveTab(tab);
-    setError("");
-    if (tab === 'login') {
-      setName("");
-    } else {
-      setEmail("");
-      setPassword("");
-    }
+  const showForgotPassword = () => {
+    alert('パスワードリセット機能は開発中です。\n\nデモ用認証情報:\nメール: test1@example.com\nパスワード: test1123');
+  };
+
+  const showSupport = () => {
+    alert('サポート情報:\n\n📞 電話: 03-1234-5678\n📧 メール: support@example.com\n⏰ 受付時間: 平日 9:00-18:00');
+  };
+
+  const showPrivacy = () => {
+    alert('プライバシーポリシー:\n\n当システムは個人情報を適切に管理し、第三者に提供することはありません。詳細は管理者にお問い合わせください。');
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            シフトスケジューラー
-          </h2>
+    <div className="min-h-screen bg-gradient-to-br from-blue-400 to-purple-600 flex items-center justify-center p-5">
+      <div className="bg-white rounded-3xl shadow-2xl overflow-hidden w-full max-w-md animate-fadeInUp">
+        {/* ヘッダー */}
+        <div className="bg-gradient-to-r from-teal-400 to-teal-500 text-white p-10 pb-8 text-center">
+          <div className="text-2xl font-bold mb-2">シフト管理システム</div>
+          <div className="text-lg opacity-90">従業員ログイン</div>
         </div>
         
-        {/* タブ */}
-        <div className="flex rounded-md shadow-sm">
-          <button
-            type="button"
-            onClick={() => handleTabChange('login')}
-            className={`flex-1 py-2 px-4 text-sm font-medium rounded-l-md border ${
-              activeTab === 'login'
-                ? 'bg-indigo-600 text-white border-indigo-600'
-                : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-            }`}
-          >
-            ログイン
-          </button>
-          <button
-            type="button"
-            onClick={() => handleTabChange('register')}
-            className={`flex-1 py-2 px-4 text-sm font-medium rounded-r-md border-t border-r border-b ${
-              activeTab === 'register'
-                ? 'bg-indigo-600 text-white border-indigo-600'
-                : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-            }`}
-          >
-            新規登録
-          </button>
-        </div>
-
-        {/* エラーメッセージ */}
-        {error && (
-          <div className="bg-red-50 border border-red-200 rounded-md p-4">
-            <p className="text-sm text-red-600">{error}</p>
+        {/* フォーム */}
+        <div className="p-10">
+          <h2 className="text-xl font-bold text-gray-800 text-center mb-8">ログイン</h2>
+          
+          {/* デモ用認証情報 */}
+          <div className="bg-gray-50 p-4 rounded-lg mb-5 text-xs text-gray-600">
+            <h4 className="text-sm font-semibold text-gray-800 mb-2">🎯 デモ用認証情報</h4>
+            <p><strong>メール:</strong> test1@example.com</p>
+            <p><strong>パスワード:</strong> test1123</p>
           </div>
-        )}
-
-        {/* ログインフォーム */}
-        {activeTab === 'login' && (
-          <form className="mt-8 space-y-6" onSubmit={handleLogin}>
-            <div className="rounded-md shadow-sm -space-y-px">
-              <div>
-                <label htmlFor="login-email" className="sr-only">
-                  メールアドレス
-                </label>
+          
+          {/* エラーメッセージ */}
+          {error && (
+            <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-3 rounded-lg mb-5 text-sm">
+              {error}
+            </div>
+          )}
+          
+          {/* 成功メッセージ */}
+          {success && (
+            <div className="bg-green-50 border-l-4 border-green-500 text-green-700 p-3 rounded-lg mb-5 text-sm">
+              {success}
+            </div>
+          )}
+          
+          <form onSubmit={handleLogin}>
+            <div className="mb-6">
+              <label className="block text-sm font-bold text-gray-700 mb-2">
+                メールアドレス
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-4 py-4 border-2 border-gray-200 rounded-xl text-base transition-all duration-300 bg-gray-50 focus:outline-none focus:border-teal-400 focus:bg-white focus:ring-4 focus:ring-teal-100"
+                placeholder="your@email.com"
+                required
+              />
+            </div>
+            
+            <div className="mb-6">
+              <label className="block text-sm font-bold text-gray-700 mb-2">
+                パスワード
+              </label>
+              <div className="relative">
                 <input
-                  id="login-email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                  placeholder="メールアドレス"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-              <div>
-                <label htmlFor="login-password" className="sr-only">
-                  パスワード
-                </label>
-                <input
-                  id="login-password"
-                  name="password"
-                  type="password"
-                  autoComplete="current-password"
-                  required
-                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                  placeholder="パスワード"
+                  type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-4 py-4 pr-12 border-2 border-gray-200 rounded-xl text-base transition-all duration-300 bg-gray-50 focus:outline-none focus:border-teal-400 focus:bg-white focus:ring-4 focus:ring-teal-100"
+                  placeholder="パスワードを入力"
+                  required
                 />
+                <button
+                  type="button"
+                  onClick={togglePassword}
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-teal-400 text-lg p-1"
+                >
+                  {showPassword ? "🙈" : "👁️"}
+                </button>
               </div>
             </div>
-
-            <div>
+            
+            <div className="flex justify-between items-center mb-8 text-sm">
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="w-4 h-4 accent-teal-400"
+                />
+                <span>ログイン状態を保持</span>
+              </label>
               <button
-                type="submit"
-                disabled={isLoading}
-                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                type="button"
+                onClick={showForgotPassword}
+                className="text-teal-400 font-medium hover:underline"
               >
-                {isLoading ? "ログイン中..." : "ログイン"}
-              </button>
-            </div>
-          </form>
-        )}
-
-        {/* 新規登録フォーム */}
-        {activeTab === 'register' && (
-          <form className="mt-8 space-y-6" onSubmit={handleRegister}>
-            <div className="space-y-4">
-              <div>
-                <label htmlFor="register-name" className="block text-sm font-medium text-gray-700">
-                  名前
-                </label>
-                <input
-                  id="register-name"
-                  name="name"
-                  type="text"
-                  autoComplete="name"
-                  required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                />
-              </div>
-              <div>
-                <label htmlFor="register-email" className="block text-sm font-medium text-gray-700">
-                  メールアドレス
-                </label>
-                <input
-                  id="register-email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                />
-              </div>
-              <div>
-                <label htmlFor="register-password" className="block text-sm font-medium text-gray-700">
-                  パスワード
-                </label>
-                <input
-                  id="register-password"
-                  name="password"
-                  type="password"
-                  autoComplete="new-password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                />
-              </div>
-            </div>
-
-            <div>
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-              >
-                {isLoading ? "登録中..." : "登録する"}
+                パスワードを忘れた場合
               </button>
             </div>
             
-            <div className="text-center">
-              <p className="text-sm text-gray-600">
-                管理者アカウントを作成しますか？{' '}
-                <Link href="/admin/register" className="font-medium text-indigo-600 hover:text-indigo-500">
-                  管理者登録
-                </Link>
-              </p>
-            </div>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full py-4 bg-gradient-to-r from-teal-400 to-teal-500 text-white font-bold rounded-xl text-base transition-all duration-300 hover:transform hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
+            >
+              {isLoading ? (
+                <div className="flex items-center justify-center">
+                  <div className="w-5 h-5 border-2 border-transparent border-t-white rounded-full animate-spin mr-2"></div>
+                  ログイン中...
+                </div>
+              ) : (
+                "ログイン"
+              )}
+            </button>
           </form>
-        )}
+          
+          {/* フッターリンク */}
+          <div className="text-center mt-8 pt-5 border-t border-gray-200">
+            <div className="flex justify-center gap-6 text-sm">
+              <button
+                onClick={showSupport}
+                className="text-gray-600 hover:text-teal-400"
+              >
+                サポート
+              </button>
+              <button
+                onClick={showPrivacy}
+                className="text-gray-600 hover:text-teal-400"
+              >
+                プライバシーポリシー
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
+      
+      <style jsx>{`
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        .animate-fadeInUp {
+          animation: fadeInUp 0.6s ease-out;
+        }
+      `}</style>
     </div>
   );
 }
